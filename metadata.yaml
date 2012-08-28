@@ -3,38 +3,3 @@ summary: "Lightweight connection pooler for PostgreSQL."
 maintainer: "Haw Loeung <haw.loeung@canonical.com>"
 description: |
     Installs the lightweight connection pooler for PostgreSQL.
-options:
-    client_login_timeout:
-        default: 60
-        description: If a client connects but does not manage to login in this amount of time, it will be disconnected. Mainly needed to avoid dead connections stalling SUSPEND and thus online restart. [seconds]
-    default_pool_size:
-        default: 20
-        description: How many server connections to allow per user/database pair. Can be overridden in the per-database configuration.
-    listen_port:
-        default: 6432
-        description: Which port to listen on. Applies to both TCP and Unix sockets.
-    max_client_conn:
-        default: 100
-        description: Maximum number of client connections allowed. When increased then the file descriptor limits should also be increased. Note that actual number of file descriptors used is more than max_client_conn.
-    pool_mode:
-        default: session
-        description: Specifies when a server connection can be reused by other clients.
-    reserve_pool_size:
-        default: 0
-        description: How many additional connections to allow to a pool. 0 disables.
-    server_check_delay:
-        default: 30
-        description: How long to keep released connections available for immediate re-use, without running sanity-check queries on it. If 0 then the query is ran always.
-    server_connect_timeout:
-        default: 15
-        description: If connection and login won’t finish in this amount of time, the connection will be closed. [seconds]
-    server_idle_timeout:
-        default: 600
-        description: If a server connection has been idle more than this many seconds it will be dropped. If 0 then timeout is disabled. [seconds]
-    server_lifetime:
-        default: 3600
-        description: The pooler will try to close server connections that have been connected longer than this. Setting it to 0 means the connection is to be used only once, then closed. [seconds]
-    server_login_retry:
-        default: 15
-        description: If login failed, because of failure from connect() or authentication that pooler waits this much before retrying to connect. [seconds]
-
