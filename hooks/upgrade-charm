@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Copyright 2012 Canonical Ltd. All rights reserved.
+# Author: Haw Loeung <haw.loeung@canonical.com>
+
+# pgbouncer charm upgrade-charm hook
+
+set -eux # -x for verbose logging to juju debug-log
+
+juju-log "Upgrading pgbouncer"
