@@ -1,0 +1,5 @@
+name: pgbouncer
+summary: "Lightweight connection pooler for PostgreSQL."
+maintainer: "Haw Loeung <haw.loeung@canonical.com>"
+description: |
+    Installs the lightweight connection pooler for PostgreSQL.
