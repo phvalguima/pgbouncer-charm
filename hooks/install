@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Copyright 2012 Canonical Ltd. All rights reserved.
+# Author: Haw Loeung <haw.loeung@canonical.com>
+
+# pgbouncer charm install hook
+
+set -eux # -x for verbose logging to juju debug-log
+
+juju-log "Installing pgbouncer package via apt-get"
+apt-get -y install -- pgbouncer
+
+# Make sure pgbouncer is enabled
+if [[ $(grep -c '^START=0$' /etc/default/pgbouncer) -ne 0 ]]; then
+	cat /etc/default/pgbouncer | sed -e 's/^START=0$/START=1/' > /tmp/pgbouncer.new
+	mv -f /tmp/pgbouncer.new /etc/default/pgbouncer
+fi
