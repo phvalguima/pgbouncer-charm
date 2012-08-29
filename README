@@ -14,6 +14,16 @@ Once bootstrapped, deploy the PgBouncer charm:
 
     juju deploy --repository=~/juju-charms/ local:precise/pgbouncer
 
+Now deploy a few instances of PostgreSQL:
+
+    juju deploy postgresql postgresql-1
+    juju deploy postgresql postgresql-2
+    juju deploy postgresql postgresql-3
+
+Create the relations:
+
+    juju add-relation pgbouncer postgresql-1:db
+
 Expose the PgBouncer installation
 
     juju expose pgbouncer

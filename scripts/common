@@ -5,39 +5,33 @@
 
 # pgbouncer charm common functions used by various hooks
 
+set -eux # -x for verbose logging to juju debug-log
+
 update_config()
 {
 	local pgbouncer_config="/etc/pgbouncer/pgbouncer.ini"
-	local databases_template="templates/pgbouncer.ini.databases.tmpl"
 	local general_template="templates/pgbouncer.ini.general.tmpl"
 
 	# Export Juju configs and relations.
-	local juju_relations=$(/bin/mktemp --suffix=.juju)
-        # XXX: This doesn't work for some reason.
-	#relation-get --format=json -o $juju_relations
 	local juju_configs=$(/bin/mktemp --suffix=.juju)
 	config-get --format=json -o $juju_configs
-
-	# XXX: TODO: Work on tying it in with the postgresql charm. For now
-	# just inject some sample data.
-
 
 	# Copy existing config file to preserve permissions.
 	cp -a $pgbouncer_config ${pgbouncer_config}.new
 
 	# Generate the "databases" section first from list of Juju relations.
-	scripts/template-generate.py -j $juju_relations $databases_template > \
-		${pgbouncer_config}.new
+	echo "[databases]" > ${pgbouncer_config}.new
+	(find /var/run/juju/ -name 'db-*' -type f -print0 | xargs --null cat) \
+		>> ${pgbouncer_config}.new
 
 	# Generate the general "pgbouncer" section with configuration options
 	# from Juju's configs.
-	scripts/template-generate.py -j $juju_configs $general_template >> \
-		${pgbouncer_config}.new
+	scripts/template-generate.py -j $juju_configs $general_template \
+		>> ${pgbouncer_config}.new
 
 	# Looks good, let's make it live.
 	mv ${pgbouncer_config}.new $pgbouncer_config
 
 	# Clean up
-	rm -f $juju_relations
 	rm -f $juju_configs
 }

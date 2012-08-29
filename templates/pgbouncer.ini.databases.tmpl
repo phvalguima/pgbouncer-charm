@@ -1,8 +1,0 @@
-[databases]
-#if $varExists('databases')
-#for $db in $databases
-${db.name} = dbname=${db.dbname} host=${db.host} port=${db.port}
-#end for
-#end if
-
-

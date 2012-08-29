@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Copyright 2012 Canonical Ltd. All rights reserved.
+# Author: Haw Loeung <haw.loeung@canonical.com>
+
+# pgbouncer charm db-relation-broken hook
+
+set -eux # -x for verbose logging to juju debug-log
+. scripts/common
+
+if [[ -e /var/run/juju/db-${JUJU_RELATION_ID} ]]; then
+	juju-log "Removing DB relation ${JUJU_RELATION_ID}"
+	rm -f /var/run/juju/db-${JUJU_RELATION_ID}
+fi
+
+juju-log "Generating new pgbouncer configuration"
+update_config
+
+juju-log "Reloading pgbouncer"
+/usr/sbin/service pgbouncer reload
