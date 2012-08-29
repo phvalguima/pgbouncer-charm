@@ -6,6 +6,7 @@
 # pgbouncer charm start hook
 
 set -eux # -x for verbose logging to juju debug-log
+. hooks/common
 
 juju-log "Starting pgbouncer"
 /usr/sbin/service pgbouncer start

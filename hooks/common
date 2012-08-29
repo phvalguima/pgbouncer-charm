@@ -12,6 +12,8 @@ update_config()
 	local juju_config=$(/bin/mktemp --suffix=.juju)
 
 	config-get --format=json -o $juju_config
+	# Copy existing config file to preserve permissions.
+	cp -a $pgbouncer_config ${pgbouncer_config}.new
 	hooks/template-generate.py -j $juju_config $template > ${pgbouncer_config}.new
 	mv ${pgbouncer_config}.new $pgbouncer_config
 	rm -f $juju_config

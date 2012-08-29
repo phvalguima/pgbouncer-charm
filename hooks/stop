@@ -6,6 +6,7 @@
 # pgbouncer charm stop hook
 
 set -eux # -x for verbose logging to juju debug-log
+. hooks/common
 
 juju-log "Stopping pgbouncer"
 /usr/sbin/service pgbouncer stop

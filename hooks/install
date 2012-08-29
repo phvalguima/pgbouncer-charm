@@ -6,6 +6,7 @@
 # pgbouncer charm install hook
 
 set -eux # -x for verbose logging to juju debug-log
+. hooks/common
 
 juju-log "Installing pgbouncer package via apt-get"
 apt-get -y install -- pgbouncer
