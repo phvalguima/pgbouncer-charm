@@ -63,7 +63,7 @@ options:
             Which port to listen on. Applies to both TCP and Unix
             sockets.
     logfile:
-        default: "/var/log/pgbouncer/pgbouncer.log"
+        default: "/var/log/postgresql/pgbouncer.log"
         type: string
         description: >
             Specifies log file. Log file is kept open so after
