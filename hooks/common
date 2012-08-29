@@ -5,9 +5,14 @@
 
 # pgbouncer charm common functions used by various hooks
 
-set -eux # -x for verbose logging to juju debug-log
-
-_update_configs()
+update_config()
 {
+	local pgbouncer_config="/etc/pgbouncer/pgbouncer.ini"
+	local template="templates/pgbouncer.ini.tmpl"
+	local juju_config=$(/bin/mktemp --suffix=.juju)
 
+	config-get --format=json -o $juju_config
+	hooks/template-generate.py -j $juju_config $template > ${pgbouncer_config}.new
+	mv ${pgbouncer_config}.new $pgbouncer_config
+	rm -f $juju_config
 }
