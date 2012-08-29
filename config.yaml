@@ -46,7 +46,7 @@ options:
         default: 15
         type: int
         description: >
-            If connection and login won\'t finish in this amount of time, the
+            If connection and login won't finish in this amount of time, the
             connection will be closed. [seconds]
     server_idle_timeout:
         default: 600
