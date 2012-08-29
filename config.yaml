@@ -1,71 +1,133 @@
 options:
+    admin_users:
+        default: "canonicaladmin"
+        type: string
+        description: >
+           Comma-separated list of database users that are allowed to
+           connect and run all commands on console. Ignored when
+           auth_mode=any, in which case any username is allowed in as
+           admin.
+    auth_file:
+        default: "/etc/pgbouncer/userlist.txt"
+        type: string
+        description: >
+            The name of the file to load user names and passwords
+            from. The file format is the same as the PostgreSQL
+            pg_auth/pg_pwd file, so this setting can be pointed
+            directly to one of those backend files.
+    auth_type:
+        default: "md5"
+        type: string
+        description: How to authenticate users.
     client_login_timeout:
         default: 60
         type: int
         description: >
-            If a client connects but does not manage to login in this amount of
-            time, it will be disconnected. Mainly needed to avoid dead
-            connections stalling SUSPEND and thus online restart. [seconds]
+            If a client connects but does not manage to login in this
+            amount of time, it will be disconnected. Mainly needed to
+            avoid dead connections stalling SUSPEND and thus online
+            restart. [seconds]
     default_pool_size:
         default: 20
         type: int
         description: >
-            How many server connections to allow per user/database pair. Can be
-            overridden in the per-database configuration.
+            How many server connections to allow per user/database
+            pair. Can be overridden in the per-database configuration.
+    ignore_startup_parameters:
+        default: "application_name"
+        type: string
+        description: >
+            By default, PgBouncer allows only parameters it can keep
+            track of in startup packets - client_encoding, datestyle,
+            timezone and standard_conforming_strings.
+
+            All others parameters will raise an error. To allow others
+            parameters, they can be specified here, so that pgbouncer
+            knows that they are handled by admin and it can ignore
+            them.
+    listen_addr:
+        default: "*"
+        type: string
+        description: >
+            Specifies list of addresses, where to listen for TCP
+            connections.  You may also use * meaning "listen on all
+            addresses". When not set, only Unix socket connections are
+            allowed.
+
+            Addresses can be specified numerically (IPv4/IPv6) or by
+            name.
     listen_port:
-        default: 6432
+        default: 5433
         type: int
         description: >
-            Which port to listen on. Applies to both TCP and Unix sockets.
+            Which port to listen on. Applies to both TCP and Unix
+            sockets.
+    logfile:
+        default: "/var/log/pgbouncer/pgbouncer.log"
+        type: string
+        description: >
+            Specifies log file. Log file is kept open so after
+            rotation kill -HUP or on console RELOAD; should be
+            done. Note: On Windows machines, the service must be
+            stopped and started.
     max_client_conn:
         default: 100
         type: int
         description: >
-            Maximum number of client connections allowed. When increased then
-            the file descriptor limits should also be increased. Note that
-            actual number of file descriptors used is more than
-            max_client_conn.
-    pool_mode:
-        default: session
+            Maximum number of client connections allowed. When
+            increased then the file descriptor limits should also be
+            increased. Note that actual number of file descriptors
+            used is more than max_client_conn.
+    pidfile:
+        default: "/var/run/postgresql/pgbouncer.pid"
         type: string
         description: >
-            Specifies when a server connection can be reused by other clients.
+            Specifies the pid file. Without a pidfile, daemonization
+            is not allowed.
+    pool_mode:
+        default: transaction
+        type: string
+        description: >
+            Specifies when a server connection can be reused by other
+            clients.
     reserve_pool_size:
         default: 0
         type: int
         description: >
-            How many additional connections to allow to a pool. 0 disables.
+            How many additional connections to allow to a pool. 0
+            disables.
     server_check_delay:
         default: 30
         type: int
         description: >
-            How long to keep released connections available for immediate
-            re-use, without running sanity-check queries on it. If 0 then the
-            query is ran always.
+            How long to keep released connections available for
+            immediate re-use, without running sanity-check queries on
+            it. If 0 then the query is ran always.
     server_connect_timeout:
         default: 15
         type: int
         description: >
-            If connection and login won't finish in this amount of time, the
-            connection will be closed. [seconds]
+            If connection and login won't finish in this amount of
+            time, the connection will be closed. [seconds]
     server_idle_timeout:
         default: 600
         type: int
         description: >
-            If a server connection has been idle more than this many seconds it
-            will be dropped. If 0 then timeout is disabled. [seconds]
+            If a server connection has been idle more than this many
+            seconds it will be dropped. If 0 then timeout is
+            disabled. [seconds]
     server_lifetime:
         default: 3600
         type: int
         description: >
-            The pooler will try to close server connections that have been
-            connected longer than this. Setting it to 0 means the connection
-            is to be used only once, then closed. [seconds]
+            The pooler will try to close server connections that have
+            been connected longer than this. Setting it to 0 means the
+            connection is to be used only once, then closed. [seconds]
     server_login_retry:
         default: 15
         type: int
         description: >
             If login failed, because of failure from connect() or
-            authentication that pooler waits this much before retrying to
-            connect. [seconds]
+            authentication that pooler waits this much before retrying
+            to connect. [seconds]
 
