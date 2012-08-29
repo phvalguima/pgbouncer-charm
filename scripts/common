@@ -13,7 +13,8 @@ update_config()
 
 	# Export Juju configs and relations.
 	local juju_relations=$(/bin/mktemp --suffix=.juju)
-	relation-get --format=json -o $juju_relations
+        # XXX: This doesn't work for some reason.
+	#relation-get --format=json -o $juju_relations
 	local juju_configs=$(/bin/mktemp --suffix=.juju)
 	config-get --format=json -o $juju_configs
 
@@ -25,12 +26,12 @@ update_config()
 	cp -a $pgbouncer_config ${pgbouncer_config}.new
 
 	# Generate the "databases" section first from list of Juju relations.
-	hooks/template-generate.py -j $juju_relations $template > \
+	scripts/template-generate.py -j $juju_relations $databases_template > \
 		${pgbouncer_config}.new
 
 	# Generate the general "pgbouncer" section with configuration options
 	# from Juju's configs.
-	hooks/template-generate.py -j $juju_configs $template >> \
+	scripts/template-generate.py -j $juju_configs $general_template >> \
 		${pgbouncer_config}.new
 
 	# Looks good, let's make it live.
