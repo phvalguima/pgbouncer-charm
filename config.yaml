@@ -107,7 +107,7 @@ options:
         default: 15
         type: int
         description: >
-            If connection and login won't finish in this amount of
+            If connection and login wont finish in this amount of
             time, the connection will be closed. [seconds]
     server_idle_timeout:
         default: 600
@@ -130,4 +130,7 @@ options:
             If login failed, because of failure from connect() or
             authentication that pooler waits this much before retrying
             to connect. [seconds]
-
+    max_open_files:
+        default: 65536
+        type: int
+        description: Set maximum open files

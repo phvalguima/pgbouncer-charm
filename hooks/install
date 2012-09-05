@@ -18,3 +18,4 @@ if [[ $(grep -c '^START=0$' /etc/default/pgbouncer) -ne 0 ]]; then
 fi
 
 update_config
+update_init_script

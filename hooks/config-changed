@@ -8,8 +8,9 @@
 set -eux # -x for verbose logging to juju debug-log
 . scripts/common
 
-juju-log "Generating new pgbouncer configuration"
+juju-log "Generating new pgbouncer configuration and init script"
 update_config
+update_init_script
 
 juju-log "Reloading pgbouncer"
 /usr/sbin/service pgbouncer reload
