@@ -35,3 +35,23 @@ update_config()
 	# Clean up
 	rm -f $juju_configs
 }
+
+update_init_script()
+{
+	local init_script='/etc/init.d/pgbouncer'
+
+	max_open_files=$(config-get max_open_files)
+
+	# Copy existing init script to preserve permissions.
+	cp -a $init_script ${init_script}.new
+
+	found=$(grep -c '^PGBOUNCER_MAXFD=' ${init_script}.new || true)
+	if [[ $found -eq 0 ]]; then
+		sed "s/^\(OPTS=.*\)/\1\nPGBOUNCER_MAXFD=${max_open_files}/; s/^d_start() {/d_start() {\n\tulimit -n \$PGBOUNCER_MAXFD\n/" $init_script > ${init_script}.new
+	else
+		sed "s/^PGBOUNCER_MAXFD=[0-9]\+/PGBOUNCER_MAXFD=${max_open_files}/" $init_script > ${init_script}.new
+	fi
+
+	# Looks good, let's make it live.
+	mv ${init_script}.new $init_script
+}
