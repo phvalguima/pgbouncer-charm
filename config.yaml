@@ -1,6 +1,6 @@
 options:
     admin_users:
-        default: "canonicaladmin"
+        default: "postgres"
         type: string
         description: >
            Comma-separated list of database users that are allowed to

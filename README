@@ -5,14 +5,14 @@ PgBouncer is a lightweight connection pooler for PostgreSQL.
 
 # Installation
 
-Ro deploy you'll need at a minimum: a cloud environment, a working Juju
+To deploy you'll need at a minimum: a cloud environment, a working Juju
 installation, and a successful bootstrap. Please refer to the
 [Juju Getting Started](https://juju.ubuntu.com/docs/getting-started.html)
 documentation before continuing.
 
-Once bootstrapped, deploy the PgBouncer charm:
+Once bootstrapped, deploy the PgBouncer charm from the Juju charm store:
 
-    juju deploy --repository=~/juju-charms/ local:precise/pgbouncer
+    juju deploy pgbouncer
 
 Now deploy a few instances of PostgreSQL:
 
