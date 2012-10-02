@@ -9,8 +9,7 @@ set -eux # -x for verbose logging to juju debug-log
 . scripts/common
 
 # Stop if pgbouncer is running
-/usr/sbin/service pgbouncer status
-if [ $? -eq 0 ]; then
+if /etc/init.d/pgbouncer status > /dev/null; then
 	juju-log "Stopping pgbouncer"
 	/usr/sbin/service pgbouncer stop
 fi

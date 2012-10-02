@@ -9,7 +9,7 @@ set -eux # -x for verbose logging to juju debug-log
 . scripts/common
 
 pgbouncer_name=$(relation-get pgbouncer_dbname)
-db_names=$(relation-get database)
+db_names=$(relation-get databases)
 db_host=$(relation-get host)
 db_port=$(relation-get port)
 
@@ -20,7 +20,7 @@ fi
 juju-log "Creating/Updating DB relations"
 for db_name in $db_names; do
 	if [[ -z $pgbouncer_name ]]; then
-		$pgbouncer_name = $db_name
+		pgbouncer_name=$db_name
 	fi
 	echo "$pgbouncer_name = dbname=${db_name} host=${db_host} port=${db_port}" > /var/run/juju/db-${JUJU_RELATION_ID}-${db_name}
 done

@@ -10,11 +10,11 @@ set -eux # -x for verbose logging to juju debug-log
 
 # Start pgbouncer if it is not running
 # Reload if pgbouncer is already running
-/usr/sbin/service pgbouncer status
-if [ $? -ne 0 ]; then
-	juju-log "Starting pgbouncer"
-	/usr/sbin/service pgbouncer start
+if /etc/init.d/pgbouncer status > /dev/null; then
+        juju-log "Reloading pgbouncer"
+        /usr/sbin/service pgbouncer reload
 else
-	juju-log "Reloading pgbouncer"
-	/usr/sbin/service pgbouncer reload
+        juju-log "Starting pgbouncer"
+        /usr/sbin/service pgbouncer start
 fi
+
