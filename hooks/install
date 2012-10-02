@@ -19,3 +19,10 @@ ulimit -n $max_open_files
 EOF
 
 update_config
+
+# Reload if pgbouncer is already running
+/usr/sbin/service pgbouncer status
+if [ $? -ne 0 ]; then
+	juju-log "Reloading pgbouncer"
+	/usr/sbin/service pgbouncer reload
+fi
