@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Create userlist.txt
+pgbouncer_userlist=/etc/pgbouncer/userlist.txt
+for file in $(find /var/run/juju/ -name '*\.password' -type f -print0); do
+	pgbouncer_user=$(echo $file| awk -F. '{print $2}')
+	echo "\"$pgbouncer_user\" \"$(cat $file)\"" >> $pgbouncer_userlist.new
+done
+chown postgres:postgres $pgbouncer_userlist.new
+chmod 600 $pgbouncer_userlist.new
+mv $pgbouncer_userlist.new $pgbouncer_userlist
+
+
+juju-log "reloading postgresql"
+service postgresql reload || exit 1

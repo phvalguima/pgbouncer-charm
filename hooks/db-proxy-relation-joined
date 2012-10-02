@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Find the backend-db-admin relationship
+backendid=$(relation-ids backend-db-admin)
+PGHOST=$(relation-get -r $backendid host)
+PGUSER=$(relation-get -r $backendid user)
+PGPASSWORD=$(relation-get -r $backendid password)
+
+service_password_file="/var/lib/juju/${database}.${user}.password"
+
+create_password() {
+  password=`pwgen -s 16`
+  echo ${password} > ${service_password_file}
+}
+has_password() {
+  [ -f ${service_password_file} ] && password=`cat ${service_password_file}`
+}
+has_password || create_password
+
+create_user() {
+  psql -c"create user ${user} password '${password}'"
+}
+has_user() {
+  psql -c"select rolname from pg_roles;" | grep -q ${user}
+}
+has_user || create_user
+
+create_database() {
+  psql -c"create database ${database} owner ${user}" 
+  psql -c"grant all privileges on database ${database} to ${user}"
+}
+has_database() {
+  psql -c"select datname from pg_database;" | grep -q ${database}
+}
+has_database || create_database
+
+relation-set host=${host} \
+             user=${user} \
+             password=${password} \
+             database=${database}
