@@ -7,5 +7,5 @@ provides:
   db-proxy:
     interface: psql
 requires:
-  backend-db:
+  backend-db-admin:
     interface: pgsql
