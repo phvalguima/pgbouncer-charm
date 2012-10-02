@@ -9,13 +9,13 @@ set -eux # -x for verbose logging to juju debug-log
 . scripts/common
 
 juju-log "Installing pgbouncer package via apt-get"
-apt-get -y install -- pgbouncer
+apt-get -y install -- pgbouncer python-cheetah
 
-# Make sure pgbouncer is enabled
-if [[ $(grep -c '^START=0$' /etc/default/pgbouncer) -ne 0 ]]; then
-	cat /etc/default/pgbouncer | sed -e 's/^START=0$/START=1/' > /tmp/pgbouncer.new
-	mv -f /tmp/pgbouncer.new /etc/default/pgbouncer
-fi
+# Make sure pgbouncer is enabled and set max open files
+max_open_files=$(config-get max_open_files)
+cat  >/etc/default/pgbouncer << EOF
+START=1
+ulimit -n $max_open_files
+EOF
 
 update_config
-update_init_script

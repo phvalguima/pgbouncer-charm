@@ -4,8 +4,8 @@ maintainer: "Haw Loeung <haw.loeung@canonical.com>"
 description: >
     Installs the lightweight connection pooler for PostgreSQL.
 provides:
-  db:
-    interface: pgbouncer
+  db-proxy:
+    interface: psql
 requires:
-  db:
+  backend-db:
     interface: pgsql
