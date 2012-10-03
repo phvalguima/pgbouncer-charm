@@ -6,6 +6,7 @@ database=${database//-/_}
 user=${JUJU_REMOTE_UNIT///*}
 user=${user//-/_}
 host=$(unit-get private-address)
+port=$(config-get listen_port)
 
 # Find the backend-db-admin relationship
 backendid=$(relation-ids backend-db-admin)
@@ -44,6 +45,7 @@ has_database() {
 has_database || create_database
 
 relation-set host=${host} \
+             port=${port} \
              user=${user} \
              password=${password} \
              database=${database}
