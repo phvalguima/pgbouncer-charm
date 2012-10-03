@@ -1,10 +1,19 @@
 #!/bin/bash
 
+# Get remote relationship
+database=${JUJU_REMOTE_UNIT///*}
+database=${database//-/_}
+user=${JUJU_REMOTE_UNIT///*}
+user=${user//-/_}
+host=$(unit-get private-address)
+
 # Find the backend-db-admin relationship
 backendid=$(relation-ids backend-db-admin)
-PGHOST=$(relation-get -r $backendid host)
-PGUSER=$(relation-get -r $backendid user)
-PGPASSWORD=$(relation-get -r $backendid password)
+backendunit=$(relation-list -r $backendid)
+export PGHOST=$(relation-get -r $backendid host $backendunit)
+export PGUSER=$(relation-get -r $backendid user $backendunit)
+export PGPASSWORD=$(relation-get -r $backendid password $backendunit)
+export PGDATABASE='template1'
 
 service_password_file="/var/lib/juju/${database}.${user}.password"
 
