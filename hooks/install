@@ -6,6 +6,7 @@
 # pgbouncer charm install hook
 
 set -eux # -x for verbose logging to juju debug-log
+. scripts/common
 
 juju-log "Installing packages via apt-get"
 apt-get -y install -- pgbouncer python-cheetah postgresql-client pwgen
