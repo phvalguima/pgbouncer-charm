@@ -9,6 +9,16 @@ set -eux # -x for verbose logging to juju debug-log
 
 update_config()
 {
+	pgbouncer_userlist=/etc/pgbouncer/userlist.txt
+	touch $pgbouncer_userlist.new
+	for file in $(find /var/lib/juju/ -maxdepth 1 -name '*\.password' -type f -print0); do
+		pgbouncer_user=$(echo $file| awk -F. '{print $2}')
+		echo "\"$pgbouncer_user\" \"$(cat $file)\"" >> $pgbouncer_userlist.new
+	done
+	chown postgres:postgres $pgbouncer_userlist.new
+	chmod 600 $pgbouncer_userlist.new
+	mv $pgbouncer_userlist.new $pgbouncer_userlist
+
 	local pgbouncer_config="/etc/pgbouncer/pgbouncer.ini"
 	local general_template="templates/pgbouncer.ini.general.tmpl"
 
@@ -21,12 +31,12 @@ update_config()
 
 	# Generate the "databases" section first from list of Juju relations.
 	echo "[databases]" > ${pgbouncer_config}.new
-	(find /var/run/juju/ -name 'db-*' -type f -print0 | xargs --null cat) \
+	(find /var/lib/juju/ -maxdepth 1 -name 'db-*' -type f -print0 | xargs --null cat) \
 		>> ${pgbouncer_config}.new
 
 	# Generate the general "pgbouncer" section with configuration options
 	# from Juju's configs.
-     # Need to use cheetah cli. Setup vars and excuete cheetah-compile???
+	# Need to use cheetah cli. Setup vars and excuete cheetah-compile???
 	scripts/template-generate.py -j $juju_configs $general_template \
 		>> ${pgbouncer_config}.new
 

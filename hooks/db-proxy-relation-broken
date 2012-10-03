@@ -1,2 +1,6 @@
 #!/bin/bash
+
+. scripts/common
+
+update_config
 exit 0

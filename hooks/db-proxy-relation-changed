@@ -1,26 +1,8 @@
 #!/bin/bash
 
-# Find the backend-db-admin relationship
-backendid=$(relation-ids backend-db-admin)
-backendunit=$(relation-list -r $backendid)
-PGHOST=$(relation-get -r $backendid host $backendunit)
+. scripts/common
 
-# Create userlist.txt
-pgbouncer_userlist=/etc/pgbouncer/userlist.txt
-touch $pgbouncer_userlist.new
-for file in $(find /var/lib/juju/ -name '*\.password' -type f -print0); do
-	pgbouncer_user=$(echo $file| awk -F. '{print $2}')
-	database=$(echo $file|awk -F/ '{print $5}' | awk -F. '{print $1}')
-	echo "\"$pgbouncer_user\" \"$(cat $file)\"" >> $pgbouncer_userlist.new
-	exists=$(grep "${database} = host=${PGHOST} port=5432 dbname=${database}" /etc/pgbouncer/pgbouncer.ini)
-	if [ -z "$exists" ]; then	
-        	sed -i -e "s/\[databases\]/[databases]\n${database} = host=${PGHOST} port=5432 dbname=${database}/" /etc/pgbouncer/pgbouncer.ini
-	fi
-done
-chown postgres:postgres $pgbouncer_userlist.new
-chmod 600 $pgbouncer_userlist.new
-mv $pgbouncer_userlist.new $pgbouncer_userlist
+update_config
 
-
-juju-log "reloading postgresql"
+juju-log "reloading pgbouncer"
 service postgresql reload || exit 1

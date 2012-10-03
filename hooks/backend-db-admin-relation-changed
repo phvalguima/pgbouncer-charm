@@ -20,7 +20,7 @@ fi
 juju-log "Creating/Updating DB relations"
 for db_name in $db_names; do
 	pgbouncer_name=$db_name
-	echo "$pgbouncer_name = dbname=${db_name} host=${db_host} port=${db_port}" > /var/run/juju/db-${JUJU_RELATION_ID}-${db_name}
+	echo "$pgbouncer_name = dbname=${db_name} host=${db_host} port=${db_port}" > /var/lib/juju/db-${JUJU_RELATION_ID}-${db_name}
 done
 
 juju-log "Generating new pgbouncer configuration"
