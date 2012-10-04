@@ -22,11 +22,7 @@ Now deploy a few instances of PostgreSQL:
 
 Create the relations:
 
-    juju add-relation pgbouncer postgresql-1:db
-
-Expose the PgBouncer installation
-
-    juju expose pgbouncer
+    juju add-relation pgbouncer:backend-db-admin postgresql:db-admin
 
 
 # Configuration
