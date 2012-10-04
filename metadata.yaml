@@ -8,4 +8,4 @@ provides:
     interface: psql
 requires:
   backend-db-admin:
-    interface: pgsql
+    interface: psql
