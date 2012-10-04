@@ -5,7 +5,7 @@ description: >
     Installs the lightweight connection pooler for PostgreSQL.
 provides:
   db-proxy:
-    interface: psql
+    interface: pgsql
 requires:
   backend-db-admin:
-    interface: psql
+    interface: pgsql
