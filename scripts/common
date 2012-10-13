@@ -45,4 +45,7 @@ update_config()
 
 	# Clean up
 	rm -f $juju_configs
+
+	juju-log "reloading pgbouncer"
+	service pgbouncer reload || exit 1
 }

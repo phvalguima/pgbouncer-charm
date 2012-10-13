@@ -3,6 +3,3 @@
 . scripts/common
 
 update_config
-
-juju-log "reloading pgbouncer"
-service postgresql reload || exit 1
