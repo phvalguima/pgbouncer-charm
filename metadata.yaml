@@ -6,6 +6,9 @@ description: >
 provides:
   db-proxy:
     interface: pgsql
+  nrpe-external-master:
+    interface: nrpe-external-master
+    scope: container
 requires:
   backend-db-admin:
     interface: pgsql
