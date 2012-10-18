@@ -1,6 +1,5 @@
 #!/bin/bash
 
-apt-get install -y python-psycopg2 > /dev/null
 unit_name=${JUJU_UNIT_NAME////-}
 nagios_hostname="$(config-get nagios_context)-${unit_name}" 
 nagios_logdir='/var/log/nagios'
