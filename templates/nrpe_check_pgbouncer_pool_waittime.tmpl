@@ -1,0 +1,5 @@
+#---------------------------------------------------
+# This file is Juju managed
+#---------------------------------------------------
+command[check_pgbouncer_pool_waittime]=/usr/local/lib/nagios/plugins/check-pgbouncer.py --checkname=check_pool_wait --host=${address} --port=${listen_port} -w ${wait_warn} -c ${wait_crit}
+

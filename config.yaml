@@ -57,7 +57,7 @@ options:
             Addresses can be specified numerically (IPv4/IPv6) or by
             name.
     listen_port:
-        default: 5433
+        default: 5434
         type: int
         description: >
             Which port to listen on. Applies to both TCP and Unix
@@ -134,3 +134,33 @@ options:
         default: 65536
         type: int
         description: Set maximum open files
+    nagios_context:
+        default: "juju"
+        type: string
+        description: |
+            Used by the nrpe-external-master subordinate charm.
+            A string that will be prepended to instance name to set the host name
+            in nagios. So for instance the hostname would be something like:
+                juju-postgresql-0
+            If you're running multiple environments with the same services in them
+            this allows you to differentiate between them.
+    wait_warn:
+         default: 5
+         type: int
+         description: |
+            The parameters to pass to the nrpe plugin check_pgbouncer_pool_waittime for warning level.
+    wait_crit:
+         default: 20
+         type: int
+         description: |
+            The parameters to pass to the nrpe plugin check_pgbouncer_pool_waittime for critical level.
+    conn_warn:
+         default: 75
+         type: int
+         description: |
+            The parameters to pass to the nrpe plugin check_pgbouncer_connection_count for warn level.
+    conn_crit:
+         default: 90
+         type: int
+         description: |
+            The parameters to pass to the nrpe plugin check_pgbouncer_connection_count for critical level.

@@ -8,8 +8,13 @@
 set -eux # -x for verbose logging to juju debug-log
 . scripts/common
 
+juju-log 'basenode_setup: begin'
+cd $CHARM_DIR/basenode && python setup.py install
+python -c "import basenode; basenode.basenode_init()"
+juju-log 'basenode_setup: end'
+
 juju-log "Installing packages via apt-get"
-apt-get -y install -- pgbouncer python-cheetah postgresql-client pwgen
+apt-get -y install -- pgbouncer python-cheetah postgresql-client pwgen python-psycopg2
 
 # Make sure pgbouncer is enabled and set max open files
 max_open_files=$(config-get max_open_files)

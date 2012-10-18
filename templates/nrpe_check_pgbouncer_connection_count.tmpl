@@ -1,0 +1,4 @@
+#---------------------------------------------------
+# This file is Juju managed
+#---------------------------------------------------
+command[check_pgbouncer_connection_count]=/usr/local/lib/nagios/plugins/check-pgbouncer.py --checkname=check_max_conns --host=${address} --port=${listen_port} -w ${conn_warn} -c ${conn_crit}
