@@ -27,6 +27,11 @@ if [ ! -d $nagios_logdir ]; then
 	chown nagios:nagios $nagios_logdir 
 fi
 
+# Remove existing checks to start clean
+for FILE in /var/lib/nagios/export/*check_pgbouncer*.cfg; do
+   rm -f $FILE
+done
+
 # Export Juju configs and relations.
 juju_configs=$(/bin/mktemp --suffix=.juju)
 config-get --format=json -o $juju_configs
@@ -56,7 +61,7 @@ scripts/template-generate.py -j $juju_configs $nrpe_check_pgbouncer_pool_waittim
 rm -f $juju_configs
 
 # Reload NRPE
-if [ -d /etc/init.d/nagios-nrpe-server ]; then
+if [ -x /etc/init.d/nagios-nrpe-server ]; then
 	service nagios-nrpe-server reload
 else
 	juju-log "Is NRPE installed?"
