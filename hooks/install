@@ -8,6 +8,7 @@
 set -eux # -x for verbose logging to juju debug-log
 [[ -d exec.d ]] && ( for f in exec.d/*/charm-pre-install; do [[ -x $f ]] && $SHELL -c "$f";done )
 
+. scripts/common
 juju-log "Installing packages via apt-get"
 apt-get -y install -- pgbouncer python-cheetah postgresql-client pwgen python-psycopg2
 
