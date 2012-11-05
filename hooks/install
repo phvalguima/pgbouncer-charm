@@ -4,6 +4,7 @@
 # Author: Haw Loeung <haw.loeung@canonical.com>
 
 # pgbouncer charm install hook
+. scripts/common
 
 set -eux # -x for verbose logging to juju debug-log
 [[ -d exec.d ]] && ( for f in exec.d/*/charm-pre-install; do [[ -x $f ]] && $SHELL -c "$f";done )
