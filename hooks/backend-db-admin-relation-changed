@@ -28,3 +28,9 @@ update_config
 
 juju-log "Reloading pgbouncer"
 /usr/sbin/service pgbouncer reload
+
+# Trigger db-proxy-relation-changed
+dbproxyid=$(relation-ids db-proxy)
+if [ -n "$dbproxyid" ]; then
+	./hooks/db-proxy-relation-changed
+fi
