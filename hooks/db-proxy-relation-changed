@@ -9,6 +9,7 @@ if [ -z "$backendid" ]; then
 	exit 0
 fi
 backendunit=$(relation-list -r $backendid)
+# TODO: Handle multple backend units
 export PGHOST=$(relation-get -r $backendid host $backendunit)
 export PGUSER=$(relation-get -r $backendid user $backendunit)
 export PGPASSWORD=$(relation-get -r $backendid password $backendunit)
