@@ -26,6 +26,10 @@ if [ "$JUJU_RELATION" != "db-proxy" ]; then
 	# TODO: This must handle multiple db-proxy relationships
 	# for JUJU_RELATION_ID in $JUJU_RELATION_IDS; do
 	export JUJU_REMOTE_UNIT=$(relation-list -r $JUJU_RELATION_ID)
+	if [ -z "$JUJU_REMOTE_UNIT" ]; then
+		juju-log "No db-proxy relation remote-unit yet, exiting"
+		exit 0
+	fi
 fi
 
 # Get remote relationship
