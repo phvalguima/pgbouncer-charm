@@ -47,7 +47,7 @@ fi
 host=$(unit-get private-address)
 port=$(config-get listen_port)
 
-service_password_file="/var/lib/juju/${database}.${user}.password"
+service_password_file="/var/lib/juju/${user}.password"
 
 create_password() {
   password=`pwgen -s 16`
