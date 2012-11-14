@@ -12,7 +12,7 @@ update_config()
 	pgbouncer_userlist=/etc/pgbouncer/userlist.txt
 	touch $pgbouncer_userlist.new
 	for file in $(find /var/lib/juju/ -maxdepth 1 -name '*\.password' -type f); do
-		pgbouncer_user=$(echo $file| awk -F. '{print $2}')
+		pgbouncer_user=$(basename $file | awk -F. '{print $1}')
 		echo "\"$pgbouncer_user\" \"$(cat $file)\"" >> $pgbouncer_userlist.new
 	done
 	chown postgres:postgres $pgbouncer_userlist.new
