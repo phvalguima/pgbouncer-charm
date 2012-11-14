@@ -35,12 +35,15 @@ fi
 
 # Get remote relationship
 database=$(relation-get database)
+user=${JUJU_REMOTE_UNIT///*}
 if [[ -z ${database} ]]; then
     database=${JUJU_REMOTE_UNIT///*}
     database=${database//-/_}
+    user=${user//-/_}
+else
+    user="${user//-/_}_${database}"
 fi
-user=${JUJU_REMOTE_UNIT///*}
-user=${user//-/_}
+
 host=$(unit-get private-address)
 port=$(config-get listen_port)
 
