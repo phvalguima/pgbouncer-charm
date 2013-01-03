@@ -8,15 +8,14 @@
 
 set -eux # -x for verbose logging to juju debug-log
 if [[ -d exec.d ]]; then
- shopt -s nullglob
- for f in exec.d/*/charm-pre-install; do
- [[ -x "$f" ]] || continue
- ${SHELL} -c "$f"|| {
- ## bail out if anyone fails
- juju-log -l ERROR "$f: returned exit_status=$? "
- exit 1
- }
- done
+	shopt -s nullglob
+	for f in exec.d/*/charm-pre-install; do
+	[[ -x "$f" ]] || continue
+	${SHELL} -c "$f"|| {
+		## bail out if anyone fails
+		juju-log -l ERROR "$f: returned exit_status=$? "
+	}
+	done
 fi
 
 . scripts/common
