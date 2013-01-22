@@ -56,7 +56,6 @@ create_password() {
 has_password() {
   [ -f ${service_password_file} ] && password=`cat ${service_password_file}`
 }
-has_password || create_password
 
 create_user() {
   psql -c"create user ${user} password '${password}'"
@@ -64,6 +63,16 @@ create_user() {
 has_user() {
   psql -c"select rolname from pg_roles;" | grep -q ${user}
 }
+set_password() {
+  psql -c"alter user ${user} password '${password}'"
+}
+
+# If we point pgbouncer at an existing db then the user may exist but the
+# password is unknown. In this case reset the password
+if has_user && ! has_password ; then
+    create_password && set_password
+fi
+has_password || create_password
 has_user || create_user
 
 create_database() {
