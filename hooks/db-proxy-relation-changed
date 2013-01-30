@@ -82,7 +82,12 @@ create_database() {
 has_database() {
   psql -c"select datname from pg_database;" | grep -q ${database}
 }
+
 has_database || create_database
+db_owner=`psql -t -c"SELECT rolname FROM pg_database JOIN pg_authid ON pg_database.datdba = pg_authid.oid where datname = '${database}'" | tr -d ' '`
+if [ "${db_owner}" != "${user}" ]; then
+  psql -c"grant ${db_owner} to ${user};"
+fi
 
 relation-set -r $JUJU_RELATION_ID host=${host} \
              port=${port} \
