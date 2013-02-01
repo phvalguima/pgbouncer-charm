@@ -60,11 +60,16 @@ has_password() {
   [ -f ${service_password_file} ] && password=`cat ${service_password_file}`
 }
 
+create_role() {
+  local l_role=${1}
+  psql -c"create user ${l_role}"
+}
 create_user() {
   psql -c"create user ${user} password '${password}'"
 }
 has_user() {
-  psql -c"select rolname from pg_roles;" | grep -wq ${user}
+  local l_role=${1:-$user}
+  psql -c"select rolname from pg_roles;" | grep -wq ${l_role}
 }
 set_password() {
   psql -c"alter user ${user} password '${password}'"
@@ -89,7 +94,8 @@ has_database() {
 has_database || create_database
 
 grant_role() {
-  l_role=$1
+  local l_role=$1
+  has_user $l_role || create_role $l_role
   echo "Granting $l_role to ${user};"
   psql -c"grant ${l_role} to ${user};"
 }
@@ -99,12 +105,14 @@ if [ "${db_owner}" != "${user}" ]; then
   grant_role $db_owner
 fi
 
+if [ -n "${roles}" ]; then
+  echo "Roles: $roles"
+  allroles=(${roles//,/ })
 
-allroles=(${roles//,/ })
-
-for role in "${allroles[@]}"; do
+  for role in "${allroles[@]}"; do
     grant_role $role
-done
+  done
+fi
 
 relation-set -r $JUJU_RELATION_ID host=${host} \
              port=${port} \
