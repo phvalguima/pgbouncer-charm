@@ -61,7 +61,7 @@ create_user() {
   psql -c"create user ${user} password '${password}'"
 }
 has_user() {
-  psql -c"select rolname from pg_roles;" | grep -q ${user}
+  psql -c"select rolname from pg_roles;" | grep -wq ${user}
 }
 set_password() {
   psql -c"alter user ${user} password '${password}'"
@@ -80,7 +80,7 @@ create_database() {
   psql -c"grant all privileges on database ${database} to ${user}"
 }
 has_database() {
-  psql -c"select datname from pg_database;" | grep -q ${database}
+  psql -c"select datname from pg_database;" | grep -wq ${database}
 }
 
 has_database || create_database
