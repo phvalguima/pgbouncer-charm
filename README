@@ -28,3 +28,10 @@ Create the relations:
 # Configuration
 
     juju set pgbouncer max_client_conn=50
+
+# db-proxy relationship
+
+The charm joining the db-proxy relationship can specify a database that
+will be created in addition to the default one based on the service name
+and can specify a comma seperated list of roles that will be granted to
+the user (these roles will be created if they do not already exist)
