@@ -35,6 +35,9 @@ fi
 
 # Get remote relationship
 database=$(relation-get database)
+# A comma seperated list of roles can be passed in by the joining charm which will be granted
+# th the db user
+roles=$(relation-get roles)
 user=${JUJU_REMOTE_UNIT///*}
 if [[ -z ${database} ]]; then
     database=${JUJU_REMOTE_UNIT///*}
@@ -57,11 +60,16 @@ has_password() {
   [ -f ${service_password_file} ] && password=`cat ${service_password_file}`
 }
 
+create_role() {
+  local l_role=${1}
+  psql -c"create user ${l_role}"
+}
 create_user() {
   psql -c"create user ${user} password '${password}'"
 }
 has_user() {
-  psql -c"select rolname from pg_roles;" | grep -q ${user}
+  local l_role=${1:-$user}
+  psql -c"select rolname from pg_roles;" | grep -wq ${l_role}
 }
 set_password() {
   psql -c"alter user ${user} password '${password}'"
@@ -80,13 +88,30 @@ create_database() {
   psql -c"grant all privileges on database ${database} to ${user}"
 }
 has_database() {
-  psql -c"select datname from pg_database;" | grep -q ${database}
+  psql -c"select datname from pg_database;" | grep -wq ${database}
 }
 
 has_database || create_database
+
+grant_role() {
+  local l_role=$1
+  has_user $l_role || create_role $l_role
+  echo "Granting $l_role to ${user};"
+  psql -c"grant ${l_role} to ${user};"
+}
+
 db_owner=`psql -t -c"SELECT rolname FROM pg_database JOIN pg_authid ON pg_database.datdba = pg_authid.oid where datname = '${database}'" | tr -d ' '`
 if [ "${db_owner}" != "${user}" ]; then
-  psql -c"grant ${db_owner} to ${user};"
+  grant_role $db_owner
+fi
+
+if [ -n "${roles}" ]; then
+  echo "Roles: $roles"
+  allroles=(${roles//,/ })
+
+  for role in "${allroles[@]}"; do
+    grant_role $role
+  done
 fi
 
 relation-set -r $JUJU_RELATION_ID host=${host} \
