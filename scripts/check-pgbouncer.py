@@ -1,17 +1,8 @@
 #!/usr/bin/python
 
-#                                       m
-#  mmmm   m   m  mmmm   mmmm    mmm   mm#mm
-#  #" "#  #   #  #" "#  #" "#  #"  #    #
-#  #   #  #   #  #   #  #   #  #""""    #
-#  ##m#"  "mm"#  ##m#"  ##m#"  "#mm"    "mm
-#  #             #      #
-#  "             "      "
-# This file is managed by puppet.  Do not make local changes.
-
 # Copyright (C) 2012 Canonical
 # All Rights Reserved
-# Author: Liam Young
+# Author: Liam Young <liam.young@canonical.com>
 
 
 from collections import defaultdict
