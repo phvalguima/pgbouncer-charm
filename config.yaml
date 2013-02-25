@@ -41,7 +41,7 @@ options:
             track of in startup packets - client_encoding, datestyle,
             timezone and standard_conforming_strings.
 
-            All others parameters will raise an error. To allow others
+            All other parameters will raise an error. To allow other
             parameters, they can be specified here, so that pgbouncer
             knows that they are handled by admin and it can ignore
             them.
@@ -141,15 +141,14 @@ options:
             Used by the nrpe-external-master subordinate charm.
             A string that will be prepended to instance name to set the host name
             in nagios. So for instance the hostname would be something like:
-                juju-postgresql-0
+                juju-pgbouncer-0
             If you're running multiple environments with the same services in them
             this allows you to differentiate between them.
     nagios_service_type:
         default: "generic"
         type: string
         description: |
-            What service this component forms part of e.g. productsearch, uccs etc. Used
-            by nrpe
+            What service this component forms part of. Used by nrpe.
     wait_warn:
          default: 5
          type: int
