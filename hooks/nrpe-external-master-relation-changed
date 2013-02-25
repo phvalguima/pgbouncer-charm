@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright 2012 Canonical Ltd. All rights reserved.
+# Author: Haw Loeung <haw.loeung@canonical.com>
+
 unit_name=${JUJU_UNIT_NAME////-}
 nagios_hostname="$(config-get nagios_context)-${unit_name}" 
 nagios_logdir='/var/log/nagios'

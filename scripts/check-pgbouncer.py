@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
-# Copyright (C) 2012 Canonical
-# All Rights Reserved
+# Copyright 2012 Canonical Ltd. All rights reserved.
 # Author: Liam Young <liam.young@canonical.com>
 
 
