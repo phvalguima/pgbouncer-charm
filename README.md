@@ -2,6 +2,8 @@
 
 PgBouncer is a lightweight connection pooler for PostgreSQL.
 
+http://wiki.postgresql.org/wiki/PgBouncer
+
 # Usage
 ## Installation
 
