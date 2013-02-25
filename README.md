@@ -2,8 +2,10 @@
 
 PgBouncer is a lightweight connection pooler for PostgreSQL.
 
+http://wiki.postgresql.org/wiki/PgBouncer
 
-# Installation
+# Usage
+## Installation
 
 To deploy you'll need at a minimum: a cloud environment, a working Juju
 installation, and a successful bootstrap. Please refer to the
@@ -25,13 +27,19 @@ Create the relations:
     juju add-relation pgbouncer:backend-db-admin postgresql:db-admin
 
 
-# Configuration
+## Configuration
 
     juju set pgbouncer max_client_conn=50
 
-# db-proxy relationship
+## db-proxy relationship
 
 The charm joining the db-proxy relationship can specify a database that
 will be created in addition to the default one based on the service name
 and can specify a comma seperated list of roles that will be granted to
 the user (these roles will be created if they do not already exist)
+
+## Monitoring
+
+This charm provides relations that support monitoring via Nagios using 
+nrpe_external_master as a subordinate charm.
+

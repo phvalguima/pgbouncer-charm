@@ -15,9 +15,8 @@ logfile = ${logfile}
 ; max_client_conn + (max_pool_size * total_databases * total_users)
 max_client_conn = ${max_client_conn}
 pidfile = ${pidfile}
-; pool_mode transaction assumes we don't use certain features of PG
-; See https://wiki.canonical.com/UbuntuOne/OperationsPlus/PoolingDBConnections#SQL
-; feature map for pooling modes
+; pool_mode transaction assumes we don't use certain features of PG. See
+; http://wiki.postgresql.org/wiki/PgBouncer#Feature_matrix_for_pooling_modes
 pool_mode = ${pool_mode}
 reserve_pool_size = ${reserve_pool_size}
 server_check_delay = ${server_check_delay}
