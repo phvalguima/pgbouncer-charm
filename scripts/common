@@ -10,14 +10,14 @@ set -eux # -x for verbose logging to juju debug-log
 update_config()
 {
 	pgbouncer_userlist=/etc/pgbouncer/userlist.txt
-	touch $pgbouncer_userlist.new
+	local pgbouncer_userlist_new=$(/bin/mktemp --suffix=.juju)
 	for file in $(find /var/lib/juju/ -maxdepth 1 -name '*\.password' -type f); do
 		pgbouncer_user=$(basename $file | awk -F. '{print $1}')
-		echo "\"$pgbouncer_user\" \"$(cat $file)\"" >> $pgbouncer_userlist.new
+		echo "\"$pgbouncer_user\" \"$(cat $file)\"" >> $pgbouncer_userlist_new
 	done
-	chown postgres:postgres $pgbouncer_userlist.new
-	chmod 600 $pgbouncer_userlist.new
-	mv $pgbouncer_userlist.new $pgbouncer_userlist
+	chown postgres:postgres $pgbouncer_userlist_new
+	chmod 600 $pgbouncer_userlist_new
+	mv $pgbouncer_userlist_new $pgbouncer_userlist
 
 	local pgbouncer_config="/etc/pgbouncer/pgbouncer.ini"
 	local general_template="templates/pgbouncer.ini.general.tmpl"
@@ -27,25 +27,25 @@ update_config()
 	config-get --format=json -o $juju_configs
 
 	# Copy existing config file to preserve permissions.
-        local pgbouncer_newconfig = `mktemp`
-	cp -a $pgbouncer_config $pgbouncer_newconfig
+        local pgbouncer_config_new=$(/bin/mktemp --suffix=.juju)
+	cp -a $pgbouncer_config $pgbouncer_config_new
 
 	# Generate the "databases" section first from list of Juju relations.
-	echo "[databases]" > $pgbouncer_newconfig
+	echo "[databases]" > ${pgbouncer_config}.new
 	(find /var/lib/juju/ -maxdepth 1 -name 'db-*' -type f -print0 | xargs --null cat) \
-		>> $pgbouncer_newconfig
+		>> $pgbouncer_config_new
 
 	# Generate the general "pgbouncer" section with configuration options
 	# from Juju's configs.
 	# Need to use cheetah cli. Setup vars and excuete cheetah-compile???
 	scripts/template-generate.py -j $juju_configs $general_template \
-		>> $pgbouncer_newconfig
+		>> $pgbouncer_config_new
 
 	# Looks good, let's make it live.
-	mv $pgbouncer_newconfig $pgbouncer_config
+	mv $pgbouncer_config_new $pgbouncer_config
 
 	# Clean up
-	rm -f $juju_configs
+	rm -f $pgbouncer_userlist_new $juju_configs $pgbouncer_config_new
 
 	juju-log "reloading pgbouncer"
 	service pgbouncer reload || exit 1
