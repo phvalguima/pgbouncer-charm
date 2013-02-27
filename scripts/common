@@ -31,7 +31,7 @@ update_config()
 	cp -a $pgbouncer_config $pgbouncer_config_new
 
 	# Generate the "databases" section first from list of Juju relations.
-	echo "[databases]" > ${pgbouncer_config}.new
+	echo "[databases]" > $pgbouncer_config_new 
 	(find /var/lib/juju/ -maxdepth 1 -name 'db-*' -type f -print0 | xargs --null cat) \
 		>> $pgbouncer_config_new
 
