@@ -39,6 +39,7 @@ PgBouncer charm from the Juju charm store:
     juju deploy pgbouncer
 
 Create the relations between pgbouncer and postgresql:
+
     juju add-relation pgbouncer:backend-db-admin postgresql:db-admin
 
 Now you have set up pgbouncer in front of your PostgreSQL units.
