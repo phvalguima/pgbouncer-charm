@@ -12,19 +12,40 @@ installation, and a successful bootstrap. Please refer to the
 [Juju Getting Started](https://juju.ubuntu.com/docs/getting-started.html)
 documentation before continuing.
 
-Once bootstrapped, deploy the PgBouncer charm from the Juju charm store:
+It is also recommended that you read the documentation for the
+postgresql charm so you understand how to set up postgresql in
+a master-slave relationship.
+
+## Example
+
+First, if you haven't already done so, bootstrap your environment:
+
+    juju bootstrap
+
+Now deploy a standalone PostgreSQL instance:
+
+    juju deploy postgresql
+
+Let's add another unit:
+
+    juju add-unit postgresql
+
+As per the documentation in the postgresql charm, you now have a master
+and a hot standby set up with replication.
+
+Now that you have a functional PostgreSQL setup, deploy the 
+PgBouncer charm from the Juju charm store:
 
     juju deploy pgbouncer
 
-Now deploy a few instances of PostgreSQL:
-
-    juju deploy postgresql postgresql-1
-    juju deploy postgresql postgresql-2
-    juju deploy postgresql postgresql-3
-
-Create the relations:
-
+Create the relations between pgbouncer and postgresql:
     juju add-relation pgbouncer:backend-db-admin postgresql:db-admin
+
+Now you have set up pgbouncer in front of your PostgreSQL units.
+
+In a real world scenario, you might have a (web) application that
+sends write queries to a master (directly) and read-only queries
+to a cluster of slaves, with load balancing using pgbouncer.
 
 
 ## Configuration
