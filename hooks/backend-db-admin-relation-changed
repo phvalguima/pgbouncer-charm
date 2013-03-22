@@ -30,15 +30,15 @@ juju-log "Reloading pgbouncer"
 /usr/sbin/service pgbouncer reload
 
 # Trigger db-proxy-relation-changed if it exists already
-dbproxy-relation-ids=$(relation-ids db-proxy)
-if [ -n "${dbproxy-relation-ids}" ]; then
-    for dbproxy-relation-id in ${dbproxy-relation-ids}; do
-	    dbproxyremoteunit=$(relation-list -r ${dbproxy-relation-id})
-	    if [ -n "${dbproxyremoteunit}" ]; then
-		    ./hooks/db-proxy-relation-changed
+dbproxy_relation_ids=$(relation-ids db-proxy)
+if [ -n "${dbproxy_relation_ids}" ]; then
+    for dbproxy_relation_id in $(echo ${dbproxy_relation_ids}); do
+        dbproxyremoteunit=$(relation-list -r ${dbproxy_relation_id})
+        if [ -n "${dbproxyremoteunit}" ]; then
+            ./hooks/db-proxy-relation-changed
             # We only need to do this once, so we can break out of the for loop
             # now
             break
-	    fi
+        fi
     done
 fi

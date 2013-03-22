@@ -8,8 +8,8 @@
 # Find the backend-db-admin relationship
 backendid=$(relation-ids backend-db-admin)
 if [ -z "$backendid" ]; then
-	juju-log "No backend-db-admin relation yet, exiting"
-	exit 0
+    juju-log "No backend-db-admin relation yet, exiting"
+    exit 0
 fi
 backendunit=$(relation-list -r $backendid)
 # TODO: Handle multple backend units
@@ -18,42 +18,9 @@ export PGUSER=$(relation-get -r $backendid user $backendunit)
 export PGPASSWORD=$(relation-get -r $backendid password $backendunit)
 export PGDATABASE='template1'
 if [ -z "$PGPASSWORD" ]; then
-	juju-log "No backend-db-admin relation yet, exiting"
-	exit 0
+    juju-log "No backend-db-admin relation yet, exiting"
+    exit 0
 fi
-
-# If called out of context
-if [ "$JUJU_RELATION" != "db-proxy" ]; then
-	juju-log "Out of db-proxy relation context, manually setting JUJU vars for db-proxy relation"
-        JUJU_RELATION="db-proxy"
-	export JUJU_RELATION_ID=$(relation-ids db-proxy)
-	# TODO: This must handle multiple db-proxy relationships
-	# for JUJU_RELATION_ID in $JUJU_RELATION_IDS; do
-	export JUJU_REMOTE_UNIT=$(relation-list -r $JUJU_RELATION_ID)
-	if [ -z "$JUJU_REMOTE_UNIT" ]; then
-		juju-log "No db-proxy relation remote-unit yet, exiting"
-		exit 0
-	fi
-fi
-
-# Get remote relationship
-database=$(relation-get database)
-# A comma seperated list of roles can be passed in by the joining charm which will be granted
-# th the db user
-roles=$(relation-get roles)
-user=${JUJU_REMOTE_UNIT///*}
-if [[ -z ${database} ]]; then
-    database=${JUJU_REMOTE_UNIT///*}
-    database=${database//-/_}
-    user=${user//-/_}
-else
-    user="${user//-/_}_${database}"
-fi
-
-host=$(unit-get private-address)
-port=$(config-get listen_port)
-
-service_password_file="/var/lib/juju/${user}.password"
 
 create_password() {
   password=`pwgen -s 16`
@@ -62,7 +29,6 @@ create_password() {
 has_password() {
   [ -f ${service_password_file} ] && password=`cat ${service_password_file}`
 }
-
 create_role() {
   local l_role=${1}
   psql -c"create user ${l_role}"
@@ -77,25 +43,13 @@ has_user() {
 set_password() {
   psql -c"alter user ${user} password '${password}'"
 }
-
-# If we point pgbouncer at an existing db then the user may exist but the
-# password is unknown. In this case reset the password
-if has_user && ! has_password ; then
-    create_password && set_password
-fi
-has_password || create_password
-has_user || create_user
-
 create_database() {
-  psql -c"create database ${database} owner ${user}" 
+  psql -c"create database ${database} owner ${user}"
   psql -c"grant all privileges on database ${database} to ${user}"
 }
 has_database() {
   psql -c"select datname from pg_database;" | grep -wq ${database}
 }
-
-has_database || create_database
-
 grant_role() {
   local l_role=$1
   has_user $l_role || create_role $l_role
@@ -103,26 +57,80 @@ grant_role() {
   psql -c"grant ${l_role} to ${user};"
 }
 
-db_owner=`psql -t -c"SELECT rolname FROM pg_database JOIN pg_authid ON pg_database.datdba = pg_authid.oid where datname = '${database}'" | tr -d ' '`
-if [ "${db_owner}" != "${user}" ]; then
-  grant_role $db_owner
-fi
+function update_db_credentials() {
+    # Get remote relationship
+    database=$(relation-get database)
+    # A comma seperated list of roles can be passed in by the joining charm
+    # which will be granted to the db user
+    roles=$(relation-get roles)
+    user=${JUJU_REMOTE_UNIT///*}
+    if [[ -z ${database} ]]; then
+        database=${JUJU_REMOTE_UNIT///*}
+        database=${database//-/_}
+        user=${user//-/_}
+    else
+        user="${user//-/_}_${database}"
+    fi
 
-if [ -n "${roles}" ]; then
-  echo "Roles: $roles"
-  allroles=(${roles//,/ })
+    host=$(unit-get private-address)
+    port=$(config-get listen_port)
 
-  for role in "${allroles[@]}"; do
-    grant_role $role
-  done
-fi
+    service_password_file="/var/lib/juju/${user}.password"
 
-relation-set -r $JUJU_RELATION_ID host=${host} \
+    # If we point pgbouncer at an existing db then the user may exist but the
+    # password is unknown. In this case reset the password
+    if has_user && ! has_password ; then
+        create_password && set_password
+    fi
+    has_password || create_password
+    has_user || create_user
+
+    has_database || create_database
+
+    db_owner=`psql -t -c"SELECT rolname FROM pg_database JOIN pg_authid ON pg_database.datdba = pg_authid.oid where datname = '${database}'" | tr -d ' '`
+    if [ "${db_owner}" != "${user}" ]; then
+      grant_role $db_owner
+    fi
+
+    if [ -n "${roles}" ]; then
+      echo "Roles: $roles"
+      allroles=(${roles//,/ })
+
+      for role in "${allroles[@]}"; do
+        grant_role $role
+      done
+    fi
+
+    relation-set -r $JUJU_RELATION_ID host=${host} \
              port=${port} \
              user=${user} \
              password=${password} \
              database=${database}
 
-echo "${database} = host=${PGHOST} port=5432 dbname=${database}" > /var/lib/juju/db-${database}
+    echo "${database} = host=${PGHOST} port=5432 dbname=${database}" > /var/lib/juju/db-${database}
+}
+
+if [ "$JUJU_RELATION" != "db-proxy" ]; then
+        # If called out of context
+        juju-log "Out of db-proxy relation context, manually setting JUJU vars for db-proxy relation"
+        JUJU_RELATION="db-proxy"
+        export JUJU_RELATION_IDS=$(relation-ids db-proxy)
+        UPDATED="False" 
+        for JUJU_RELATION_ID in $(echo ${JUJU_RELATION_ID}); do
+            export JUJU_REMOTE_UNIT=$(relation-list -r $JUJU_RELATION_ID)
+            if [ -n "$JUJU_REMOTE_UNIT" ]; then
+                # Do something here
+                update_db_credentials
+                UPDATED="True"
+            fi
+        done
+        if [ "$UPDATED" = "False" ]; then
+            juju-log "Nothing updated, exiting"
+            exit 0
+        fi
+else
+        # We're being called normally
+        update_db_credentials
+fi
 
 update_config
