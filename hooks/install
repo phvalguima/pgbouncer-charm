@@ -22,6 +22,8 @@ fi
 juju-log "Installing packages via apt-get"
 apt-get -y install -- pgbouncer python-cheetah postgresql-client pwgen python-psycopg2
 
+ensure_package_status "${SERVICE_AFFECTING_PACKAGES}" $(config-get package_status)
+
 # Make sure pgbouncer is enabled and set max open files
 max_open_files=$(config-get max_open_files)
 cat  >/etc/default/pgbouncer << EOF

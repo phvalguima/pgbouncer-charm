@@ -149,6 +149,12 @@ options:
         type: string
         description: |
             What service this component forms part of. Used by nrpe.
+    package_status:
+        default: "install"
+        type: string
+        description: |
+            The status of service-affecting packages will be set to this value in the dpkg database.
+            Useful valid values are "install" and "hold".
     wait_warn:
          default: 5
          type: int
