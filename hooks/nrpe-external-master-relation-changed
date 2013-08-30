@@ -68,7 +68,7 @@ rm -f $juju_configs
 
 # Create nagios user in pgbouncer
 nagios_home=$(getent passwd nagios | awk -F: '{ print $6 }')
-if [ ! -f ${nagios_home}/.pgpass ] && [ ! -f /var/lib/juju/nagios.password ]; then
+if [ ! -f ${nagios_home}/.pgpass ] || [ ! -f /var/lib/juju/nagios.password ]; then
     password=$(pwgen -s 16)
     nagios_home=$(getent passwd nagios | awk -F: '{ print $6 }')
     if [ -d $nagios_home ]; then
