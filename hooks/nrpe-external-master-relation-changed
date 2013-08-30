@@ -67,22 +67,25 @@ scripts/template-generate.py -j $juju_configs $nrpe_check_pgbouncer_pool_waittim
 rm -f $juju_configs
 
 # Create nagios user in pgbouncer
-password=$(pwgen -s 16)
 nagios_home=$(getent passwd nagios | awk -F: '{ print $6 }')
-if [ -d $nagios_home ]; then
-    echo "*:*:*:nagios:${password}" > ${nagios_home}/.pgpass
-    chown nagios:nagios ${nagios_home}/.pgpass
-    chmod 600 ${nagios_home}/.pgpass
-else
-    juju-log "No home directory for nagios"
-    exit 1
-fi
-if [ -d /var/lib/juju/ ]; then
-    echo "${password}" > /var/lib/juju/nagios.password
-    update_config
-else
-    juju-log "No /var/lib/juju directory"
-    exit 1
+if [ ! -f ${nagios_home}/.pgpass ] && [ ! -f /var/lib/juju/nagios.password ]; then
+    password=$(pwgen -s 16)
+    nagios_home=$(getent passwd nagios | awk -F: '{ print $6 }')
+    if [ -d $nagios_home ]; then
+        echo "*:*:*:nagios:${password}" > ${nagios_home}/.pgpass
+        chown nagios:nagios ${nagios_home}/.pgpass
+        chmod 600 ${nagios_home}/.pgpass
+    else
+        juju-log "No home directory for nagios"
+        exit 1
+    fi
+    if [ -d /var/lib/juju/ ]; then
+        echo "${password}" > /var/lib/juju/nagios.password
+        update_config
+    else
+        juju-log "No /var/lib/juju directory"
+        exit 1
+    fi
 fi
 
 # Reload NRPE
