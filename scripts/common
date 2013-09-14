@@ -7,6 +7,8 @@
 
 set -eux # -x for verbose logging to juju debug-log
 
+SERVICE_AFFECTING_PACKAGES="pgbouncer"
+
 update_config()
 {
 	pgbouncer_userlist=/etc/pgbouncer/userlist.txt
@@ -49,4 +51,20 @@ update_config()
 
 	juju-log "reloading pgbouncer"
 	service pgbouncer reload || exit 1
+}
+
+ensure_package_status()
+{
+	packages="$1" ; shift
+	status="$1" ; shift
+
+	case $status in
+	install|hold)
+		for package in ${packages}; do
+			echo ${package} ${status}
+		done | dpkg --set-selections
+		;;
+	*)
+		;;
+	esac
 }

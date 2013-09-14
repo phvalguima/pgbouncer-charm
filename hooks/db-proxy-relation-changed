@@ -113,8 +113,8 @@ function update_db_credentials() {
 if [ "$JUJU_RELATION" != "db-proxy" ]; then
     # If called out of context
     juju-log "Out of db-proxy relation context, manually setting JUJU vars for db-proxy relation"
-    JUJU_RELATION="db-proxy"
-    export JUJU_RELATION_IDS=$(relation-ids db-proxy)
+    export JUJU_RELATION="db-proxy"
+    JUJU_RELATION_IDS=$(relation-ids db-proxy)
     UPDATED="False" 
     for JUJU_RELATION_ID in $(echo ${JUJU_RELATION_ID}); do
         export JUJU_REMOTE_UNIT=$(relation-list -r $JUJU_RELATION_ID)
