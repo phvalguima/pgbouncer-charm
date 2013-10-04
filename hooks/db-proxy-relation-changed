@@ -18,7 +18,7 @@ export PGUSER=$(relation-get -r $backendid user $backendunit)
 export PGPASSWORD=$(relation-get -r $backendid password $backendunit)
 export PGDATABASE='template1'
 if [ -z "$PGPASSWORD" ]; then
-    juju-log "No backend-db-admin relation yet, exiting"
+    juju-log "backend-db-admin relation not finished yet, exiting"
     exit 0
 fi
 
