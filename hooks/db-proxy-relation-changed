@@ -18,7 +18,7 @@ export PGUSER=$(relation-get -r $backendid user $backendunit)
 export PGPASSWORD=$(relation-get -r $backendid password $backendunit)
 export PGDATABASE='template1'
 if [ -z "$PGPASSWORD" ]; then
-    juju-log "No backend-db-admin relation yet, exiting"
+    juju-log "backend-db-admin relation not finished yet, exiting"
     exit 0
 fi
 
@@ -59,10 +59,10 @@ grant_role() {
 
 function update_db_credentials() {
     # Get remote relationship
-    database=$(relation-get database)
+    database=$(relation-get -r $JUJU_RELATION_ID database $JUJU_REMOTE_UNIT)
     # A comma seperated list of roles can be passed in by the joining charm
     # which will be granted to the db user
-    roles=$(relation-get roles)
+    roles=$(relation-get -r $JUJU_RELATION_ID roles $JUJU_REMOTE_UNIT)
     user=${JUJU_REMOTE_UNIT///*}
     if [[ -z ${database} ]]; then
         database=${JUJU_REMOTE_UNIT///*}
@@ -116,7 +116,7 @@ if [ "$JUJU_RELATION" != "db-proxy" ]; then
     export JUJU_RELATION="db-proxy"
     JUJU_RELATION_IDS=$(relation-ids db-proxy)
     UPDATED="False" 
-    for JUJU_RELATION_ID in $(echo ${JUJU_RELATION_ID}); do
+    for JUJU_RELATION_ID in $(echo ${JUJU_RELATION_IDS}); do
         export JUJU_REMOTE_UNIT=$(relation-list -r $JUJU_RELATION_ID)
         if [ -n "$JUJU_REMOTE_UNIT" ]; then
             update_db_credentials

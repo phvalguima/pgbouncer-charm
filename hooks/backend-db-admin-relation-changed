@@ -12,6 +12,13 @@ pgbouncer_name=$(relation-get pgbouncer_dbname)
 db_names=$(relation-get database)
 db_host=$(relation-get host)
 db_port=$(relation-get port)
+db_password=$(relation-get password)
+db_user=$(relation-get user)
+
+if [ -z "$db_password" ] || [ -z "$db_user" ]; then
+    juju-log "backend-db-admin relation not finished yet, exiting"
+    exit 0
+fi
 
 if [[ -z $db_port ]]; then
 	db_port=5432
