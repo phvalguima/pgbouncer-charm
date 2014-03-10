@@ -7,17 +7,19 @@ set -eux # -x for verbose logging to juju debug-log
 . scripts/common
 
 unit_name=${JUJU_UNIT_NAME////-}
-nagios_hostname="$(config-get nagios_context)-${unit_name}" 
+export nagios_hostname="$(config-get nagios_context)-${unit_name}" 
 nagios_logdir='/var/log/nagios'
 nagios_check_script=/usr/local/lib/nagios/plugins/check-pgbouncer.py
-nagios_servicegroup=$(config-get nagios_context)
-address=$(config-get listen_addr)
+export nagios_servicegroup=$(config-get nagios_context)
+export address=$(config-get listen_addr)
 if [ "$address" = "*" ]; then
-    address=$(unit-get private-address)
+    export address=$(unit-get private-address)
 fi
-listen_port=$(config-get listen_port)
-wait_warn=$(config-get wait_warn)
-wait_crit=$(config-get wait_crit)
+export listen_port=$(config-get listen_port)
+export wait_warn=$(config-get wait_warn)
+export wait_crit=$(config-get wait_crit)
+export conn_warn=$(config-get conn_warn)
+export conn_crit=$(config-get conn_crit)
 
 nagios_uid=$(getent passwd nagios | awk -F: '{ print $3}')
 nagios_gid=$(getent passwd nagios | awk -F: '{ print $4}')
