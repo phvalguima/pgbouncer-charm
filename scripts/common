@@ -24,12 +24,8 @@ update_config()
 	local pgbouncer_config="/etc/pgbouncer/pgbouncer.ini"
 	local general_template="templates/pgbouncer.ini.general.tmpl"
 
-	# Export Juju configs and relations.
-	local juju_configs=$(/bin/mktemp --suffix=.juju)
-	config-get --format=json -o $juju_configs
-
 	# Copy existing config file to preserve permissions.
-        local pgbouncer_config_new=$(/bin/mktemp --suffix=.juju)
+	local pgbouncer_config_new=$(/bin/mktemp --suffix=.juju)
 	cp -a $pgbouncer_config $pgbouncer_config_new
 
 	# Generate the "databases" section first from list of Juju relations.
@@ -39,15 +35,31 @@ update_config()
 
 	# Generate the general "pgbouncer" section with configuration options
 	# from Juju's configs.
-	# Need to use cheetah cli. Setup vars and excuete cheetah-compile???
-	scripts/template-generate.py -j $juju_configs $general_template \
-		>> $pgbouncer_config_new
+	export admin_users=$(config-get admin_users)
+	export auth_file=$(config-get auth_file)
+	export auth_type=$(config-get auth_type)
+	export client_login_timeout=$(config-get client_login_timeout)
+	export default_pool_size=$(config-get default_pool_size)
+	export ignore_startup_parameters=$(config-get ignore_startup_parameters)
+	export listen_addr=$(config-get listen_addr)
+	export listen_port=$(config-get listen_port)
+	export logfile=$(config-get logfile)
+	export max_client_conn=$(config-get max_client_conn)
+	export pidfile=$(config-get pidfile)
+	export pool_mode=$(config-get pool_mode)
+	export reserve_pool_size=$(config-get reserve_pool_size)
+	export server_check_delay=$(config-get server_check_delay)
+	export server_connect_timeout=$(config-get server_connect_timeout)
+	export server_idle_timeout=$(config-get server_idle_timeout)
+	export server_lifetime=$(config-get server_lifetime)
+	export server_login_retry=$(config-get server_login_retry)
+	cheetah fill --env --stdout $general_template >> $pgbouncer_config_new
 
 	# Looks good, let's make it live.
 	mv $pgbouncer_config_new $pgbouncer_config
 
 	# Clean up
-	rm -f $pgbouncer_userlist_new $juju_configs $pgbouncer_config_new
+	rm -f $pgbouncer_userlist_new $pgbouncer_config_new
 
 	juju-log "reloading pgbouncer"
 	service pgbouncer reload || exit 1
