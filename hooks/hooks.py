@@ -2,11 +2,19 @@
 # Copyright 2014 Canonical Ltd. All rights reserved.
 
 import subprocess
+from textwrap import dedent
 
 from charmhelpers import fetch
 from charmhelpers.core import hookenv, host
 from charmhelpers.core.hookenv import (
     log, CRITICAL, ERROR, WARNING, INFO, DEBUG)
+
+
+try:
+    from jinja2 import Template
+except ImportError:
+    fetch.apt_install(['python-jinja2'], fatal=True)
+    from jinja2 import Template
 
 
 hooks = hookenv.Hooks()
@@ -31,7 +39,14 @@ def install():
             subprocess.check_call(['sh', '-c', f])
 
 
-@hooks.hook('config_changed')
+@hooks.hook(
+    'config_changed',
+    'db-proxy-relation-joined',
+    'db-proxy-relation-changed',
+    'db-proxy-relation-broken',
+    'backend-db-admin-relation-joined',
+    'backend-db-admin-relation-changed',
+    'backend-db-admin-relation-broken')
 def reset_the_world():
     config = hookenv.config()
     install_packages()
@@ -39,22 +54,29 @@ def reset_the_world():
     # Retrieve requirements from client units.
     for relid, relunit in reltype_units('db-proxy'):
         relinfo = hookenv.relation_get(unit=relunit, rid=relid)
+        # If the client has not provided a database name, we generate
+        # the same one that the PostgreSQL charm would choose if the
+        # client service was directly connected. This way, the proxy can
+        # easily be added and removed between a client and the database.
         database = client_relinfo.get('database', service_name(relunit))
         roles = set(client_relinfo.get('roles', '').split(','))
-        break  # All units should agree, eventually.
+        break  # All units should agree, eventually. No need to continue.
 
-    # Discover server units, informing them of client requirements.
-    servers = set()
-    for relid, relunit in reltype_units('db-admin-backend'):
-        # Inform the server unit of the client requirements.
+    # Inform backend relations of client requirements.
+    for relid in relation_ids('backend-db-admin'):
         hookenv.relation_set(relid, database=database, roles=roles)
+
+    # Discover server units, ready or not.
+    servers = set()
+    for relid, relunit in reltype_units('backend-db-admin'):
         servers.add(relunit)
 
-    # Discover ready server units and their roles.
+    # Discover server units that are ready, and their roles.
     master = None
     master_state = None
     master_relinfo = None
-    for relid, relunit in reltype_units('db-admin-backend'):
+    standby_relinfos = set()
+    for relid, relunit in reltype_units('backend-db-admin'):
         relinfo = hookenv.relation_get(unit=relunit, rid=relid)
 
         # If the backend is not yet ready to talk to us, skip it.
@@ -71,7 +93,7 @@ def reset_the_world():
             master_state = state
             master_relinfo = relinfo
         elif len(servers) > 1 and state == 'hot standby':
-            standbys.add(relunit)
+            standby_relinfos.add(relinfo))
         else:
             continue
 
@@ -88,17 +110,43 @@ def reset_the_world():
                                 state=master_state
                                 allowed_units=allowed_units)
 
+    regenerate_pgbouncer_config(config, master_relinfo, standby_relinfos)
+
     open_ports(config)
+
     if host.service_running(SERVICE_NAME):
         host.service_reload(SERVICE_NAME)
 
     config.save()
 
 
-def reltype_units(reltype):
-    for relid in hookenv.relation_ids(reltype):
-        for relunit in hookenv.related_units(relid):
-            yield relid, relunit
+def regenerate_pgbouncer_config(config, master_relinfo, standbys):
+    params = dict(config)
+    params['databases'] = set()
+
+    database = master_relinfo['database']
+
+    quote = lambda x: x.replace('"', '""')
+
+    # Database section for the master or standalone database.
+    if master_relinfo:
+        databases.add("{} = {}".format(
+            quote(database),
+            connstr(master_relinfo['host'], master_relinfo['port'], database)))
+
+    # TODO: Add a section for the standby databases, via local haproxy.
+
+    # Regenerate /etc/pgbouncer/pgbouncer.ini
+    template_file = "{}/templates/pgbouncer.ini".format(hookenv.charm_dir())
+    contents = Template(open(template_file).read()).render(config)
+    host.write_file('/etc/pgbouncer/pgbouncer.ini', contents)
+
+    # Regenerate /etc/default/pgbouncer.
+    contents = dedent("""\
+                      START=1
+                      ulimit -n 65536
+                      """).format(**config)
+    host.write_file('/etc/default/pgbouncer', contents)
 
 
 def install_packages():
@@ -113,6 +161,19 @@ def open_ports(config):
         if config.previous(port) is not None:
             hookenv.close_port(config.previous(port))
         hookenv.open_port(config['port'])
+
+
+def reltype_units(reltype):
+    for relid in hookenv.relation_ids(reltype):
+        for relunit in hookenv.related_units(relid):
+            yield relid, relunit
+
+
+def connstr(host, port, dbname):
+    param = lambda x: "'{}'".format(
+        str(x).replace('\\','\\\\').replace("'","\\'"))
+    return "host={} port={} dbname={}".format(
+        param(host), param(port), param(dbame))
 
 
 if __name__ == '__main__':
