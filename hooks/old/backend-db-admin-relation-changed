@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Copyright 2012 Canonical Ltd. All rights reserved.
+# Author: Haw Loeung <haw.loeung@canonical.com>
+
+# pgbouncer charm db-relation-changed hook
+
+set -eux # -x for verbose logging to juju debug-log
+. scripts/common
+
+pgbouncer_name=$(relation-get pgbouncer_dbname)
+db_names=$(relation-get database)
+db_host=$(relation-get host)
+db_port=$(relation-get port)
+db_password=$(relation-get password)
+db_user=$(relation-get user)
+
+if [ -z "$db_password" ] || [ -z "$db_user" ]; then
+    juju-log "backend-db-admin relation not finished yet, exiting"
+    exit 0
+fi
+
+if [[ -z $db_port ]]; then
+	db_port=5432
+fi
+
+juju-log "Creating/Updating DB relations"
+for db_name in $db_names; do
+	pgbouncer_name=$db_name
+	echo "$pgbouncer_name = dbname=${db_name} host=${db_host} port=${db_port}" > /var/lib/juju/db-${JUJU_RELATION_ID}-${db_name}
+done
+
+juju-log "Generating new pgbouncer configuration"
+update_config
+
+juju-log "Reloading pgbouncer"
+/usr/sbin/service pgbouncer reload
+
+# Trigger db-proxy-relation-changed if it exists already
+dbproxy_relation_ids=$(relation-ids db-proxy)
+if [ -n "${dbproxy_relation_ids}" ]; then
+    for dbproxy_relation_id in $(echo ${dbproxy_relation_ids}); do
+        dbproxyremoteunit=$(relation-list -r ${dbproxy_relation_id})
+        if [ -n "${dbproxyremoteunit}" ]; then
+            ./hooks/db-proxy-relation-changed
+            # We only need to do this once, so we can break out of the for loop
+            # now
+            break
+        fi
+    done
+fi

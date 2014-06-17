@@ -1,5 +1,19 @@
+;;
+;; This file is generated and maintained by the pgbouncer juju charm.
+;;
+[databases]
+
+{% for database_stanza in database_stanzas %}
+{{ database_stanza }}
+{% endfor %}
+
 [pgbouncer]
 
+listen_addr = {{ config.listen_addr}}
+listen_port = {{ config.listen_port}}
+
+{#  Note that a username generated for a relation can never match any of
+    these administrative users. #}
 admin_users = ubuntu, postgres, root, pgbouncer
 stats_users = nagios
 
@@ -10,27 +24,17 @@ logfile = /var/log/postgresql/pgbouncer.log
 unix_socket_dir = /var/run/postgresql
 user = postgres
 
-listen_addr = ${listen_addr}
-listen_port = ${listen_port}
+pool_mode = {{ config.pool_mode }}
+default_pool_size = {{ config.default_pool_size }}
+reserve_pool_size = {{ config.reserve_pool_size }}
+max_client_conn = {{ config.max_client_conn }}
 
-; pool_mode transaction assumes we don't use certain features of PG. See
-; http://wiki.postgresql.org/wiki/PgBouncer#Feature_matrix_for_pooling_modes
-pool_mode = ${pool_mode}
-default_pool_size = ${default_pool_size}
-reserve_pool_size = ${reserve_pool_size}
-
-client_login_timeout = ${client_login_timeout}
-
-; max client connections is per user/db - Note file descriptor limits need to
-; be upped based on the following calculation:
-; max_client_conn + (max_pool_size * total_databases * total_users)
-max_client_conn = ${max_client_conn}
-
-server_connect_timeout = ${server_connect_timeout}
-server_idle_timeout = ${server_idle_timeout}
-server_lifetime = ${server_lifetime}
-server_login_retry = ${server_login_retry}
-server_reset_query = DISCARD ALL;
-server_check_delay = ${server_check_delay}
-server_check_query = SELECT 1;
-ignore_startup_parameters = ${ignore_startup_parameters}
+client_login_timeout = {{ config.client_login_timeout }}
+server_connect_timeout = {{ config.server_connect_timeout }}
+server_idle_timeout = {{ config.server_idle_timeout }}
+server_lifetime = {{ config.server_lifetime }}
+server_login_retry = {{ config.server_login_retry }}
+server_reset_query = DISCARD ALL
+server_check_delay = {{ config.server_check_delay }}
+server_check_query = SELECT 1
+ignore_startup_parameters = {{ config.ignore_startup_parameters }}
