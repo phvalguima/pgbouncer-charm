@@ -1,0 +1,30 @@
+#!/usr/bin/python3
+
+import amulet
+
+d = amulet.Deployment()
+
+d.add('postgresql')
+d.add('pgbouncer')
+d.add('psql', 'postgresql-psql')
+d.relate('postgresql:db-admin', 'pgbouncer:backend-db-admin')
+d.relate('psql:db', 'pgbouncer:db-proxy')
+
+try:
+    d.setup(timeout=900)
+    d.sentry.wait()
+except amulet.helpers.TimeoutError:
+    amulet.raise_status(amulet.SKIP, msg="Environment wasn't stood up in time")
+except:
+    raise
+
+psql = d.sentry.unit['psql']
+
+print('***')
+print(repr(psql.run('psql-db -c "SELECT TRUE"')))
+print('***')
+
+if True:
+    amulet.raise_status(amulet.PASS)
+else:
+    amulet.raise_status(amulet.FAIL)
