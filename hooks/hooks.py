@@ -70,11 +70,11 @@ def reset_the_world():
     for relid, relunit, relinfo in relname_units(CLIENT_RELNAME):
         client_users[relid] = username(relid, relunit)
         client_roles[relid] = (
-            client_roles.get(relid, '')
+            client_roles.get(relid, None)
             or set(role.strip()
                    for role in relinfo.get('roles', '').split(',')
                    if role.strip()))
-        client_databases[relid] = (client_databases.get(relid, '')
+        client_databases[relid] = (client_databases.get(relid, None)
                                    or relinfo.get('database', '').strip()
                                    or dbname(relunit))
 
@@ -295,14 +295,14 @@ def ensure_user(con, user, roles):
     roles_to_revoke = existing_roles.difference(wanted_roles)
 
     for role in roles_to_grant:
-        if not role_exists(con, user):
+        if not role_exists(con, role):
             log("Creating role {}".format(role), INFO)
             cur.execute("CREATE ROLE %s INHERIT NOLOGIN",
                         (AsIs(quote_identifier(role)),))
         log("Granting {} to {}".format(role, user), INFO)
         cur.execute(
             "GRANT %s TO %s",
-            (AsIs(quote_identifier(role)), AsIs(quote_identifier(role))))
+            (AsIs(quote_identifier(role)), AsIs(quote_identifier(user))))
 
     for role in roles_to_revoke:
         log("Revoking {} from {}".format(role, user), INFO)
