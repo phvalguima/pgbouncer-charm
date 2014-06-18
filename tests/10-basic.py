@@ -127,7 +127,7 @@ subprocess.check_call([
 # refuses to tell us when it is safe to continue. It is impossible to
 # write juju tests that are not flaky, so instead we ratchet up this
 # sleep to minimize the chances of triggering a suprious failure.
-time.sleep(60)
+time.sleep(10)
 
 relid = run('psql/0', 'relation-ids db')
 relinfo = json.loads(run(

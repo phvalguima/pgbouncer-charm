@@ -69,10 +69,11 @@ def reset_the_world():
     client_databases = {}
     for relid, relunit, relinfo in relname_units(CLIENT_RELNAME):
         client_users[relid] = username(relid, relunit)
-        client_roles[relid] = set((client_roles.get(relid, '')
-                               or relinfo.get('roles', '')).split(','))
+        client_roles[relid] = (
+            client_roles.get(relid, '') or set(
+                role.strip() for role in relinfo.get('roles', '').split(',')))
         client_databases[relid] = (client_databases.get(relid, '')
-                                   or relinfo.get('database', '')
+                                   or relinfo.get('database', '').strip()
                                    or dbname(relunit))
 
     # We have everything we need, so generate a valid pgbouncer
