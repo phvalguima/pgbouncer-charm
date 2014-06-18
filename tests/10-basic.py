@@ -159,4 +159,4 @@ with Tunnel('psql/0', relinfo) as tunnel:
         print("Not granted role")
         amulet.raise_status(amulet.FAIL)
 
-amulet.raise_status(amulet.SUCCESS)
+amulet.raise_status(amulet.PASS)

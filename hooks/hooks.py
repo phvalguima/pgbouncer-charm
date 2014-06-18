@@ -78,7 +78,7 @@ def reset_the_world():
                                    or relinfo.get('database', '').strip()
                                    or dbname(relunit))
 
-    # We have everything we need, so generate a valid pgbouncer
+    # We have everything we need. Generate a valid pgbouncer
     # configuration.
     regenerate_pgbouncer_config(config, set(client_databases.values()),
                                 master, standbys)
