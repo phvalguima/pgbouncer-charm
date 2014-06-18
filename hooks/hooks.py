@@ -69,10 +69,10 @@ def reset_the_world():
     client_databases = {}
     for relid, relunit, relinfo in relname_units(CLIENT_RELNAME):
         client_users[relid] = username(relid, relunit)
-        client_roles[relid] = (client_roles.get(relid, '')
-                               or sanitize(relinfo.get('roles', '')))
+        client_roles[relid] = set((client_roles.get(relid, '')
+                               or relinfo.get('roles', '')).split(','))
         client_databases[relid] = (client_databases.get(relid, '')
-                                   or sanitize(relinfo.get('database', ''))
+                                   or relinfo.get('database', '')
                                    or dbname(relunit))
 
     # We have everything we need, so generate a valid pgbouncer
@@ -281,10 +281,7 @@ def ensure_user(con, user, roles):
     wanted_roles = set(roles)
     cur.execute("""
         SELECT role.rolname
-        FROM
-            pg_roles AS role,
-            pg_roles AS member,
-            pg_auth_members
+        FROM pg_roles AS role, pg_roles AS member, pg_auth_members
         WHERE
             member.oid = pg_auth_members.member
             AND role.oid = pg_auth_members.roleid
