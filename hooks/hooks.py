@@ -11,7 +11,7 @@ from textwrap import dedent
 
 from charmhelpers import fetch
 from charmhelpers.core import hookenv, host
-from charmhelpers.core.hookenv import log, INFO
+from charmhelpers.core.hookenv import log, INFO, CRITICAL
 
 try:
     import jinja2
@@ -399,7 +399,6 @@ def ensure_admin_passwords():
                 os.path.join(home, '.pgpass'),
                 "*:*:*:{}:{}".format(user, pw),
                 user, user, 0600)
-
 
 
 if __name__ == '__main__':
