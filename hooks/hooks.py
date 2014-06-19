@@ -190,7 +190,7 @@ def install_packages():
     packages = fetch.filter_installed_packages(packages)
     if packages:
         fetch.apt_install(packages, fatal=True)
-    ensure_package_status(pgbouncer, hookenv.config('package_status'))
+    ensure_package_status('pgbouncer', hookenv.config('package_status'))
 
 
 def ensure_package_status(package, status):
