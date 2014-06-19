@@ -59,6 +59,8 @@ def reset_the_world():
     config = hookenv.config()
     install_packages()
 
+    ensure_admin_passwords()
+
     master, standbys = discover_backends()
 
     # Gather requirements from the client relations. Not all units in a
@@ -184,10 +186,21 @@ def regenerate_pgbouncer_config(config, databases, master, standbys):
 
 
 def install_packages():
-    packages = ['pgbouncer']
+    packages = set('pgbouncer', 'python-cheetah', 'postgresql-client')
     packages = fetch.filter_installed_packages(packages)
     if packages:
         fetch.apt_install(packages, fatal=True)
+    ensure_package_status(pgbouncer, hookenv.config('package_status'))
+
+
+def ensure_package_status(package, status):
+    selections = ''.join(['{} {}\n'.format(package, status)])
+    dpkg = subprocess.Popen(
+        ['dpkg', '--set-selections'], stdin=subprocess.PIPE)
+    dpkg.communicate(input=selections)
+    if dpkg.returncode != 0:
+        log('dpkg --set-selections failed', CRITICAL)
+        sys.exit(1)
 
 
 def open_ports(config):
@@ -374,6 +387,19 @@ def quote_identifier(identifier):
                     c = '\\' + c[2:]
                 escaped.append(c)
         return 'U&"%s"' % ''.join(escaped)
+
+
+def ensure_admin_passwords():
+    users = set('root', 'postgres', 'ubuntu', 'pgbouncer', 'nagios')
+    for user in users:
+        pw = password(user)  # Ensure password exists in userlist.txt
+        home = os.path.expanduser('~{}'.format(user))
+        if os.path.isdir(home):
+            host.write_file(
+                os.path.join(home, '.pgpass'),
+                "*:*:*:{}:{}".format(user, pw),
+                user, user, 0600)
+
 
 
 if __name__ == '__main__':
