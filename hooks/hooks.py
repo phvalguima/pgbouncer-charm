@@ -51,6 +51,7 @@ def install():
 
 @hooks.hook(
     'config-changed',
+    'upgrade-charm',
     'db-proxy-relation-changed',
     'db-proxy-relation-departed',
     'backend-db-admin-relation-changed',
@@ -79,6 +80,8 @@ def reset_the_world():
         client_databases[relid] = (client_databases.get(relid, None)
                                    or relinfo.get('database', '').strip()
                                    or dbname(relunit))
+
+    recreate_console_shortcut()
 
     # We have everything we need. Generate a valid pgbouncer
     # configuration.
@@ -399,6 +402,13 @@ def ensure_admin_passwords():
                 os.path.join(home, '.pgpass'),
                 "*:*:*:{}:{}".format(user, pw),
                 user, user, 0600)
+
+
+def recreate_console_shortcut():
+    """Generate a small script to connect to the pgbouncer console."""
+    contents = "#!/bin/sh\nexec psql -h localhost -p {} pgbouncer".format(
+        hookenv.config('listen_port'))
+    host.write_file('/usr/local/bin/psql-pgbouncer', contents, perms=0555)
 
 
 if __name__ == '__main__':
