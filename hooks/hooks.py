@@ -390,7 +390,7 @@ def quote_identifier(identifier):
 
 
 def ensure_admin_passwords():
-    users = set('root', 'postgres', 'ubuntu', 'pgbouncer', 'nagios')
+    users = ['root', 'postgres', 'ubuntu', 'pgbouncer', 'nagios']
     for user in users:
         pw = password(user)  # Ensure password exists in userlist.txt
         home = os.path.expanduser('~{}'.format(user))
