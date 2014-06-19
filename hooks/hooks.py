@@ -81,8 +81,6 @@ def reset_the_world():
                                    or relinfo.get('database', '').strip()
                                    or dbname(relunit))
 
-    recreate_console_shortcut()
-
     # We have everything we need. Generate a valid pgbouncer
     # configuration.
     regenerate_pgbouncer_config(config, set(client_databases.values()),
@@ -90,6 +88,8 @@ def reset_the_world():
     open_ports(config)
     if host.service_running(SERVICE_NAME):
         host.service_reload(SERVICE_NAME)
+
+    recreate_console_shortcut()
 
     # We have done as much as we can without having a master backend
     # available for creating users, databases etc. If there is no master
@@ -259,7 +259,8 @@ def dbname(unit):
 def password(username):
     """Return the password for a user from the userlist.txt.
 
-    The password will be generated if it does not already exist.
+    The password will be generated and stored in userlist.txt if it
+    does not already exist.
     """
     # userlist.txt is trivially parsed and regenerated using Python's
     # csv module.
