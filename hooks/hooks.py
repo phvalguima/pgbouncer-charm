@@ -186,7 +186,7 @@ def regenerate_pgbouncer_config(config, databases, master, standbys):
 
 
 def install_packages():
-    packages = set('pgbouncer', 'python-cheetah', 'postgresql-client')
+    packages = ['pgbouncer', 'python-cheetah', 'postgresql-client']
     packages = fetch.filter_installed_packages(packages)
     if packages:
         fetch.apt_install(packages, fatal=True)
