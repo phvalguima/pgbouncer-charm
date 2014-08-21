@@ -25,7 +25,7 @@ cache = {}
 def cached(func):
     """Cache return values for multiple executions of func + args
 
-    For example:
+    For example::
 
         @cached
         def unit_get(attribute):
@@ -285,8 +285,9 @@ def relation_get(attribute=None, unit=None, rid=None):
         raise
 
 
-def relation_set(relation_id=None, relation_settings={}, **kwargs):
+def relation_set(relation_id=None, relation_settings=None, **kwargs):
     """Set relation information for the current unit"""
+    relation_settings = relation_settings if relation_settings else {}
     relation_cmd_line = ['relation-set']
     if relation_id is not None:
         relation_cmd_line.extend(('-r', relation_id))
@@ -445,18 +446,19 @@ class UnregisteredHookError(Exception):
 class Hooks(object):
     """A convenient handler for hook functions.
 
-    Example:
+    Example::
+
         hooks = Hooks()
 
         # register a hook, taking its name from the function name
         @hooks.hook()
         def install():
-            ...
+            pass  # your code here
 
         # register a hook, providing a custom hook name
         @hooks.hook("config-changed")
         def config_changed():
-            ...
+            pass  # your code here
 
         if __name__ == "__main__":
             # execute a hook based on the name the program is called by
