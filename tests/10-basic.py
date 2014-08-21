@@ -91,7 +91,7 @@ d.relate('psql:db', 'pgbouncer:db-proxy')
 try:
     d.setup(timeout=900)
 except amulet.helpers.TimeoutError:
-    amulet.raise_status(amulet.SKIP, msg="Environment wasn't stood up in time")
+    amulet.raise_status(amulet.SKIP, msg="Environment was not setup in time")
 except:
     raise
 
@@ -123,16 +123,26 @@ with Tunnel('psql/0', relinfo) as tunnel:
 subprocess.check_call([
     'juju', 'set', 'psql', 'database=explicitdb', 'roles=a_role'])
 
-# Per Bug #1200267 we have to sleep and pray here, because juju still
-# refuses to tell us when it is safe to continue. It is impossible to
-# write juju tests that are not flaky, so instead we ratchet up this
-# sleep to minimize the chances of triggering a suprious failure.
-time.sleep(10)
-
-relid = run('psql/0', 'relation-ids db')
-relinfo = json.loads(run(
-    'psql/0',
-    'relation-get --format=json -r {} - pgbouncer/0'.format(relid)))
+# Per Bug #1200267 we have no way of telling when the relation has been
+# setup. Instead, we loop for a while until we get the result we expect,
+# and fail if we timeout and give up.
+start = time.time()
+while True:
+    time.sleep(1)
+    now = time.time()
+    try:
+        relid = run('psql/0', 'relation-ids db')
+        relinfo = json.loads(run(
+            'psql/0',
+            'relation-get --format=json -r {} - pgbouncer/0'.format(relid)))
+        if now > start + 120:
+            break
+        if ('psql/0' in relinfo['allowed-units']
+                and relinfo['database'] == 'explicitdb'):
+            break
+    except Exception:
+        if now > start + 120:
+            raise
 
 if 'psql/0' not in relinfo['allowed-units']:
     print("client not found in allowed-units")
