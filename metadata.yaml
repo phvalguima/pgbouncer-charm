@@ -3,6 +3,8 @@ summary: "Lightweight connection pooler for PostgreSQL."
 maintainer: Stuart Bishop <stuart.bishop@canonical.com>
 description: >
     PgBouncer is a lightweight connection pooler for PostgreSQL.
+categories:
+    - databases
 provides:
   db-proxy:
     interface: pgsql
