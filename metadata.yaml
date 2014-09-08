@@ -1,8 +1,10 @@
 name: pgbouncer
 summary: "Lightweight connection pooler for PostgreSQL."
-maintainer: "Haw Loeung <haw.loeung@canonical.com>, Alexander List <alexander.list@canonical.com>"
+maintainer: Stuart Bishop <stuart.bishop@canonical.com>
 description: >
-    Installs the lightweight connection pooler for PostgreSQL.
+    PgBouncer is a lightweight connection pooler for PostgreSQL.
+categories:
+    - databases
 provides:
   db-proxy:
     interface: pgsql

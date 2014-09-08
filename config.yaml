@@ -3,6 +3,7 @@ options:
         default: "postgres"
         type: string
         description: >
+           DEPRECATED AND IGNORED.
            Comma-separated list of database users that are allowed to
            connect and run all commands on console. Ignored when
            auth_mode=any, in which case any username is allowed in as
@@ -11,6 +12,7 @@ options:
         default: "/etc/pgbouncer/userlist.txt"
         type: string
         description: >
+            DEPRECATED AND IGNORED.
             The name of the file to load user names and passwords
             from. The file format is the same as the PostgreSQL
             pg_auth/pg_pwd file, so this setting can be pointed
@@ -18,7 +20,9 @@ options:
     auth_type:
         default: "md5"
         type: string
-        description: How to authenticate users.
+        description: >
+            DEPRECATED AND IGNORED.
+            How to authenticate users.
     client_login_timeout:
         default: 60
         type: int
@@ -57,7 +61,7 @@ options:
             Addresses can be specified numerically (IPv4/IPv6) or by
             name.
     listen_port:
-        default: 5434
+        default: 6432
         type: int
         description: >
             Which port to listen on. Applies to both TCP and Unix
@@ -66,6 +70,7 @@ options:
         default: "/var/log/postgresql/pgbouncer.log"
         type: string
         description: >
+            DEPRECATED AND IGNORED.
             Specifies log file. Log file is kept open so after
             rotation kill -HUP or on console RELOAD; should be
             done. Note: On Windows machines, the service must be
@@ -82,6 +87,7 @@ options:
         default: "/var/run/postgresql/pgbouncer.pid"
         type: string
         description: >
+            DEPRECATED AND IGNORED.
             Specifies the pid file. Without a pidfile, daemonization
             is not allowed.
     pool_mode:
@@ -133,7 +139,9 @@ options:
     max_open_files:
         default: 65536
         type: int
-        description: Set maximum open files
+        description: >
+            DEPRECATED AND IGNORED.
+            Set maximum open files
     nagios_context:
         default: "juju"
         type: string

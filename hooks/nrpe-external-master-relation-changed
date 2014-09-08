@@ -4,7 +4,6 @@
 # Author: Haw Loeung <haw.loeung@canonical.com>
 
 set -eux # -x for verbose logging to juju debug-log
-. scripts/common
 
 unit_name=${JUJU_UNIT_NAME////-}
 export nagios_hostname="$(config-get nagios_context)-${unit_name}" 
@@ -58,28 +57,6 @@ nrpe_check_pgbouncer_connection_count_service_file_template="${CHARM_DIR}/templa
 nrpe_check_pgbouncer_pool_waittime_service_file_template="${CHARM_DIR}/templates/nrpe_check_pgbouncer_pool_waittime_service_file.tmpl"
 cheetah fill --env --stdout $nrpe_check_pgbouncer_connection_count_service_file_template > $nrpe_check_pgbouncer_connection_count_service_file
 cheetah fill --env --stdout $nrpe_check_pgbouncer_pool_waittime_service_file_template > $nrpe_check_pgbouncer_pool_waittime_service_file
-
-# Create nagios user in pgbouncer
-nagios_home=$(getent passwd nagios | awk -F: '{ print $6 }')
-if [ ! -f ${nagios_home}/.pgpass ] || [ ! -f /var/lib/juju/nagios.password ]; then
-    password=$(pwgen -s 16)
-    nagios_home=$(getent passwd nagios | awk -F: '{ print $6 }')
-    if [ -d $nagios_home ]; then
-        echo "*:*:*:nagios:${password}" > ${nagios_home}/.pgpass
-        chown nagios:nagios ${nagios_home}/.pgpass
-        chmod 600 ${nagios_home}/.pgpass
-    else
-        juju-log "No home directory for nagios"
-        exit 1
-    fi
-    if [ -d /var/lib/juju/ ]; then
-        echo "${password}" > /var/lib/juju/nagios.password
-        update_config
-    else
-        juju-log "No /var/lib/juju directory"
-        exit 1
-    fi
-fi
 
 # Reload NRPE
 if [ -x /etc/init.d/nagios-nrpe-server ]; then
