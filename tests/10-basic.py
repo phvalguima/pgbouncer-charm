@@ -42,9 +42,6 @@ class Tunnel:
                 self.local_port, self.relinfo['host'], self.relinfo['port'])]
         self._proc = subprocess.Popen(
             tunnel_cmd, stdin=subprocess.PIPE, preexec_fn=os.setpgrp)
-            # Don't disable stdout, so we can see when there are SSH
-            # failures like bad host keys.
-            #stdout=open('/dev/null', 'ab'), stderr=subprocess.STDOUT)
         self._proc.stdin.close()
 
         timeout = time.time() + 60
