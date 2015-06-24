@@ -87,7 +87,11 @@ def reset_the_world():
                                 master, standbys)
     open_ports(config)
     if host.service_running(SERVICE_NAME):
-        host.service_reload(SERVICE_NAME)
+        if config.changed('listen_port') or config.changed('listen_addr'):
+            stop()
+            start()
+        else:
+            host.service_reload(SERVICE_NAME)
 
     recreate_console_shortcut()
 
