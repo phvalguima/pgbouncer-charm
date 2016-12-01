@@ -1,0 +1,15 @@
+includes:
+  - layer:basic
+  - layer:apt
+  - layer:leadership
+  - layer:nagios
+  - interface:pgsql
+options:
+  basic:
+    packages:
+      - pgbouncer
+      - postgresql-client
+      - python3-psycopg2
+  apt:
+    version_package: pgbouncer
+repo: git+ssh://git.launchpad.net/~stub/+git/pgbouncer-charm

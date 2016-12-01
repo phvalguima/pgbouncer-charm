@@ -1,0 +1,9 @@
+# bundletester configuration
+bootstrap: true
+reset: false
+tests: ""
+virtualenv: false
+makefile:
+  - testdeps
+  - lint
+  - integration
