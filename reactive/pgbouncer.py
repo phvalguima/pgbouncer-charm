@@ -22,7 +22,7 @@ from charmhelpers import context
 from charmhelpers.core import hookenv, host
 from charmhelpers.core.hookenv import log, INFO
 from charms import reactive, leadership
-from charms.reactive import hook, when, when_not, not_unless
+from charms.reactive import hook, when, when_not, not_unless, Endpoint
 
 import jinja2
 import psycopg2
@@ -280,7 +280,7 @@ def connect(dbname='postgres'):
     c = dict(get_backend().master)
     c['dbname'] = dbname
     try:
-        con = psycopg2.connect(ConnectionString(**c))
+        con = psycopg2.connect(str(ConnectionString(**c)))
     except psycopg2.OperationalError:
         # Even though our reactive states are set, they may lag behind
         # reality. The PostgreSQL backend may have already run its
@@ -296,8 +296,10 @@ def connect(dbname='postgres'):
 @not_unless('backend-db-admin.master.available')
 def get_backend():
     '''Return the :class:`ConnectionStrings` to the backend databases'''
-    for relid in context.Relations()['backend-db-admin'].keys():
+    tep = Endpoint.from_name('backend-db-admin')
+    for relid in tep.relations:
         return ConnectionStrings(relid)
+
 
 
 def get_username(relid, unit, schema=False):
