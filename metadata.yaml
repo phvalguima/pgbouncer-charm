@@ -1,21 +1,22 @@
-"name": "pgbouncer"
-"summary": "Lightweight connection pooler for PostgreSQL."
-"maintainer": "Stuart Bishop <stuart.bishop@canonical.com>"
-"description": "PgBouncer is a lightweight connection pooler for PostgreSQL.\n"
-"tags":
-- "databases"
-"series":
-- "xenial"
-- "bionic"
-- "focal"
-"requires":
-  "backend-db-admin":
-    "interface": "pgsql"
-"provides":
-  "nrpe-external-master":
-    "interface": "nrpe-external-master"
-    "scope": "container"
-  "db":
-    "interface": "pgsql"
-  "db-admin":
-    "interface": "pgsql"
+name: pgbouncer
+summary: "Lightweight connection pooler for PostgreSQL."
+maintainer: Stuart Bishop <stuart.bishop@canonical.com>
+description: >
+  PgBouncer is a lightweight connection pooler for PostgreSQL.
+tags:
+  - databases
+series:
+  - xenial
+  - bionic
+  - focal
+provides:
+  nrpe-external-master:
+    interface: nrpe-external-master
+    scope: container
+  db:
+    interface: pgsql
+  db-admin:
+    interface: pgsql
+requires:
+  backend-db-admin:
+    interface: pgsql
