@@ -301,7 +301,6 @@ def get_backend():
         return ConnectionStrings(relid)
 
 
-
 def get_username(relid, unit, schema=False):
     """Generate the same username as the PostgreSQL charm would.
 
