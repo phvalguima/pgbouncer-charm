@@ -164,3 +164,31 @@ options:
       If auth_user is set, then any user not specified in
       auth_file will be queried through the auth_query query from pg_shadow in the database,
       using auth_user.
+  reserve_pool_timeout:
+    default: !!int "5"
+    type: int
+    description: |
+      If a client has not been serviced in this many seconds, use additional connections from
+      the reserve pool. 0 disables.
+  client_idle_timeout:
+    default: !!int "0"
+    type: int
+    description: |
+      Client connections idling longer than this many seconds are closed. This should be larger
+      than the client-side connection lifetime settings, and only used for network problems. [seconds]
+  idle_transaction_timeout:
+    default: !!int "0"
+    type: int
+    description: |
+      If a client has been in "idle in transaction" state longer, it will be disconnected. [seconds]
+  admin_users:
+    default: "ubuntu, postgres, root, pgbouncer"
+    type: string
+    description: |
+      Comma-separated list of database users that are allowed to connect and run all commands on the
+      console. Ignored when auth_type is any, in which case any user name is allowed in as admin.
+  vip:
+    type: string
+    default:
+    description: |
+      Virtual IP to use to front pgbouncer units.

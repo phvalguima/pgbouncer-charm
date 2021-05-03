@@ -9,7 +9,7 @@ listen_port = {{ config.listen_port}}
 
 {#  Note that a username generated for a relation can never match any of
     these administrative users. #}
-admin_users = ubuntu, postgres, root, pgbouncer
+admin_users = {{ config.admin_users }}
 stats_users = nagios
 
 auth_file = /etc/pgbouncer/userlist.txt
@@ -37,6 +37,9 @@ server_reset_query = DISCARD ALL
 server_check_delay = {{ config.server_check_delay }}
 server_check_query = SELECT 1
 ignore_startup_parameters = {{ config.ignore_startup_parameters }}
+reserve_pool_timeout = {{ config.reserve_pool_timeout }}
+client_idle_timeout = {{ config.client_idle_timeout }}
+idle_transaction_timeout = {{ config.idle_transaction_timeout }}
 
 [databases]
 

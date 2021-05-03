@@ -3,6 +3,7 @@ includes:
   - layer:apt
   - layer:leadership
   - layer:nagios
+  - layer:hacluster
   - interface:pgsql
   - interface:nrpe-external-master
 options:

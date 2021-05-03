@@ -95,9 +95,14 @@ def restart():
 @when_not('pgbouncer.needs_restart')
 def reload():
     config = hookenv.config()
+    service_ip = None
+    if config['vip']:
+        service_ip = config['vip']
+    else:
+        service_ip = hookenv.unit_private_ip()
     if reactive.helpers.data_changed('pgbouncer.restart',
                                      [config['listen_port'],
-                                      hookenv.unit_private_ip()]):
+                                      service_ip]):
         hookenv.log('pgbouncer restart required')
         reactive.set_state('pgbouncer.needs_restart')
     elif host.service_reload(SERVICE_NAME):
@@ -154,7 +159,11 @@ def configure(backend):
                 # with the 'old' v1 protocol. The lead pgbouncer unit will
                 # advertise as the master, and any remaining pgbouncer
                 # units will advertise as a standby.
-                relation.local['host'] = hookenv.unit_private_ip()
+                vip = config['vip']
+                if vip:
+                    relation.local['host'] = vip
+                else:
+                    relation.local['host'] = hookenv.unit_private_ip()
                 relation.local['database'] = dbname
                 relation.local['port'] = str(config['listen_port'])
                 relation.local['user'] = uname
@@ -232,7 +241,11 @@ def generate_pgbouncer_config(databases):
         os.path.join(hookenv.charm_dir(), 'templates'))
     env = jinja2.Environment(loader=loader)
     env.globals['config'] = hookenv.config()
-    env.globals['listen_addr'] = hookenv.unit_private_ip()
+    vip = hookenv.config('vip')
+    if vip:
+        env.globals['listen_addr'] = '*'
+    else:
+        env.globals['listen_addr'] = hookenv.unit_private_ip()
 
     def pgbouncer_quote(x):
         return x.replace('"', '""')
@@ -499,3 +512,18 @@ def quote_identifier(identifier):
                     c = b'\\' + c[2:]
                 escaped.append(c)
         return 'U&"{}"'.format(''.join(s.decode('ascii') for s in escaped))
+
+
+@when('ha.connected')
+@when_not("hacluster-configured")
+def cluster_connected(hacluster):
+    """Configure HA resources in corosync"""
+    vip = hookenv.config('vip') or None
+    if vip:
+        hacluster.add_vip('pgbouncer', vip)
+        hacluster.bind_resources()
+        reactive.set_state('pgbouncer.needs_restart')
+        reactive.set_state('hacluster-configured')
+    else:
+        hookenv.status_set('blocked', 'vip should be configured when the \
+        charm is related to hacluster')
