@@ -12,34 +12,34 @@ options:
   install_sources:
     type: string
     description: >
-      List of extra apt sources, per charm-helpers standard format (a yaml 
-      list of strings encoded as a string). Each source may be either a line 
-      that can be added directly to sources.list(5), or in the form 
-      ppa:<user>/<ppa-name> for adding Personal Package Archives, or a 
+      List of extra apt sources, per charm-helpers standard format (a yaml
+      list of strings encoded as a string). Each source may be either a line
+      that can be added directly to sources.list(5), or in the form
+      ppa:<user>/<ppa-name> for adding Personal Package Archives, or a
       distribution component to enable.
   install_keys:
     type: string
     description: >
-      List of signing keys for install_sources package sources, per 
+      List of signing keys for install_sources package sources, per
       charmhelpers standard format (a yaml list of strings encoded as a string).
       The keys should be the full ASCII armoured GPG public keys. While GPG key
       ids are also supported and looked up on a keyserver, operators should be
-      aware that this mechanism is insecure. null can be used if a standard 
+      aware that this mechanism is insecure. null can be used if a standard
       package signing key is used that will already be installed on the machine,
-      and for PPA sources where the package signing key is securely retrieved 
+      and for PPA sources where the package signing key is securely retrieved
       from Launchpad..
   nagios_context:
     type: string
     description: >
       Used by the nrpe subordinate charms. A string that will be prepended to
-      instance name to set the host name in nagios. So for instance the 
+      instance name to set the host name in nagios. So for instance the
       hostname would be something like: juju-myservice-0.
-      If you're running multiple environments with the same services in them 
+      If you're running multiple environments with the same services in them
       this allows you to differentiate between them.
   nagios_servicegroups:
     type: string
     description: >
-      A comma-separated list of nagios servicegroups. If left empty, the 
+      A comma-separated list of nagios servicegroups. If left empty, the
       nagios_context will be used as the servicegroup.
   client_login_timeout:
     default: 60
@@ -150,3 +150,17 @@ options:
     description: >
       The parameters to pass to the nrpe plugin
       check_pgbouncer_connection_count for critical level.
+  auth_user:
+    default: test_auth
+    type: string
+    description: >
+      If auth_user is set, then any user not specified in
+      auth_file will be queried through the auth_query query from pg_shadow in the database,
+      using auth_user.
+  auth_query:
+    default: SELECT usename, passwd FROM pg_shadow WHERE usename=$1
+    type: string
+    description: >
+      If auth_user is set, then any user not specified in
+      auth_file will be queried through the auth_query query from pg_shadow in the database,
+      using auth_user.

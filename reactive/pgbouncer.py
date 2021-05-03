@@ -120,6 +120,8 @@ def configure(backend):
     if con is None:
         return
 
+    if config['auth_user'] and hookenv.is_leader():
+        ensure_user(con, config['auth_user'], 'auth', True)
     dbnames = set()
     for relname in ['db', 'db-admin']:
         for relid, relation in relations[relname].items():
