@@ -42,6 +42,9 @@ client_idle_timeout = {{ config.client_idle_timeout }}
 idle_transaction_timeout = {{ config.idle_transaction_timeout }}
 
 [databases]
+{% for database_config in config.extra_db_config.split(",") %}
+{{ database_config }}
+{% endfor %}
 
 {% for database_stanza in database_stanzas %}
 {{ database_stanza }}

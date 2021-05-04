@@ -192,3 +192,7 @@ options:
     default:
     description: |
       Virtual IP to use to front pgbouncer units.
+  extra_db_config:
+    type: string
+    description: |
+      List of databases configurations that pgbouncer will manage.
