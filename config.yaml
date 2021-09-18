@@ -196,3 +196,47 @@ options:
     type: string
     description: |
       Comma delimited list of databases configurations that pgbouncer will manage.
+  client_ca:
+    type: string
+    description: |
+      Root certificate file to validate client certificates.
+      Must be in base64 format, e.g.:
+      $ juju config pgbouncer client_ca="$(cat my-ca-crt | base64 -w0)"
+      If set, client_tls_sslmode is set to "verify-ca" mode.
+    default: ""
+  client_crt:
+    type: string
+    description: |
+      Private certificate for PgBouncer to accept client connections.
+      Must be in base64 format, e.g.:
+      $ juju config pgbouncer client_ca="$(cat my-crt | base64 -w0)"
+    default: ""
+  client_key:
+    type: string
+    description: |
+      Private key for PgBouncer to accept client connections.
+      Must be in base64 format, e.g.:
+      $ juju config pgbouncer client_ca="$(cat my-key | base64 -w0)"
+    default: ""
+  server_ca:
+    type: string
+    description: |
+      Root certificate file to validate client certificates.
+      Must be in base64 format, e.g.:
+      $ juju config pgbouncer server_ca="$(cat my-ca-crt | base64 -w0)"
+      If set, server_tls_sslmode is set to "verify-ca" mode.
+    default: ""
+  server_crt:
+    type: string
+    description: |
+      Private certificate for PgBouncer to accept client connections.
+      Must be in base64 format, e.g.:
+      $ juju config pgbouncer server_ca="$(cat my-crt | base64 -w0)"
+    default: ""
+  server_key:
+    type: string
+    description: |
+      Private key for PgBouncer to accept client connections.
+      Must be in base64 format, e.g.:
+      $ juju config pgbouncer server_ca="$(cat my-key | base64 -w0)"
+    default: ""

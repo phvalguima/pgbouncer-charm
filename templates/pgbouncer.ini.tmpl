@@ -41,6 +41,28 @@ reserve_pool_timeout = {{ config.reserve_pool_timeout }}
 client_idle_timeout = {{ config.client_idle_timeout }}
 idle_transaction_timeout = {{ config.idle_transaction_timeout }}
 
+{% if config.client_crt and config.client_key %}
+{% if config.client_ca %}
+client_tls_sslmode = verify-ca
+client_tls_ca_file = /etc/pgbouncer/root_client.crt
+{% else %}
+client_tls_sslmode = require
+{% endif %}
+client_tls_key_file = /etc/pgbouncer/key_client
+client_tls_cert_file = /etc/pgbouncer/cert_client
+{% endif %}
+
+{% if config.server_crt and config.server_key %}
+{% if config.server_ca %}
+server_tls_sslmode = verify-ca
+server_tls_ca_file = /etc/pgbouncer/root_server.crt
+{% else%}
+server_tls_sslmode = require
+{% endif %}
+server_tls_key_file = /etc/pgbouncer/key_server
+server_tls_cert_file = /etc/pgbouncer/cert_server
+{% endif %}
+
 [databases]
 {% if config.extra_db_config %}
 {% for database_config in config.extra_db_config.split(",") %}

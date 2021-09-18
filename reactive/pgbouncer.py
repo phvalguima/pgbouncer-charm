@@ -17,12 +17,14 @@ import csv
 from io import StringIO
 import os.path
 from textwrap import dedent
+from base64 import b64decode
 
 from charmhelpers import context
+from charmhelpers.contrib.openstack.cert_utils import install_certs
 from charmhelpers.core import hookenv, host
 from charmhelpers.core.hookenv import log, INFO
 from charms import reactive, leadership
-from charms.reactive import hook, when, when_not, not_unless, Endpoint
+from charms.reactive import hook, when, when_any, when_not, not_unless, Endpoint
 
 import jinja2
 import psycopg2
@@ -57,6 +59,20 @@ def blocked():
 @when_not('backend-db-admin.master.available')
 def waiting(backend):
     hookenv.status_set('waiting', 'Waiting for backend relation')
+
+@when('pgbouncer.enabled')
+@when('backend-db-admin.connected')
+@when_not('backend-db-admin.master.available')
+@when('backend-db-admin.master.removed-available')
+def check_backend_db_available():
+    # Try to connect to the database: avoids a situation where
+    # backend-db-admin.master.available and database was out of reach
+    # when connect() was called.
+    # Checks for a flag that connect() sets:
+    #    backend-db-admin.master.removed-available
+    if connect():
+        reactive.set_state('backend-db-admin.master.available')
+        reactive.set_state('backend-db-admin.master.removed-available')
 
 
 @when('pgbouncer.enabled')
@@ -114,6 +130,19 @@ def reload():
 
 @when('pgbouncer.enabled')
 @when('backend-db-admin.master.available')
+@when_any('config.changed.client_ca',
+          'config.changed.client_crt',
+          'config.changed.client_key',
+          'config.changed.server_ca',
+          'config.changed.server_crt',
+          'config.changed.server_key')
+def update_certificate(backend):
+    configure(backend)
+    reactive.set_state('pgbouncer.needs_restart')
+
+
+@when('pgbouncer.enabled')
+@when('backend-db-admin.master.available')
 def configure(backend):
     config = hookenv.config()
 
@@ -124,6 +153,29 @@ def configure(backend):
     con = connect()
     if con is None:
         return
+
+    certs = {}
+    if len(config['client_crt']) > 0 and len(config['client_key']) > 0:
+        certs['client'] = {
+            'cert': b64decode(config['client_crt']).rstrip(),
+            'key': b64decode(config['client_key']).rstrip()
+        }
+    if len(config['server_crt']) > 0 and len(config['server_key']) > 0:
+        certs['server'] = {
+            'cert': b64decode(config['server_crt']).rstrip(),
+            'key': b64decode(config['server_key']).rstrip()
+        }
+    if len(certs) > 0:
+        install_certs("/etc/pgbouncer", certs,
+                      user="postgres", group="postgres")
+    if len(config['client_ca']) > 0:
+        host.install_ca_cert(
+            b64decode(config['client_ca']).rstrip(),
+            name="/etc/pgbouncer/root_client.crt")
+    if len(config['server_ca']) > 0:
+        host.install_ca_cert(
+            b64decode(config['server_ca']).rstrip(),
+            name="/etc/pgbouncer/root_server.crt")
 
     if config['auth_user'] and hookenv.is_leader():
         ensure_user(con, config['auth_user'], 'auth', True)
@@ -302,7 +354,11 @@ def connect(dbname='postgres'):
         # -departed hook and revoked access, before this units
         # backend-db-admin-relation-departed hook has had a chance to
         # run.
+        hookenv.log("connect(): failed to connect to database,"
+                    " removing backend-db-admin.master.available")
         reactive.remove_state('backend-db-admin.master.available')
+        reactive.set_state(
+            'backend-db-admin.master.removed-available')
         return None
     con.autocommit = True
     return con
